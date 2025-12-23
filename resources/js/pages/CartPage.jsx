@@ -342,238 +342,376 @@
 // pages/CartPage.jsx
 
 
-import React from "react";
+// import React from "react";
+// import { toast } from "react-toastify";
+// import { FaRegTrashAlt } from "react-icons/fa";
+// import { usePage, router } from "@inertiajs/react";
+// import { Link } from "@inertiajs/react";
+// import { route } from "ziggy-js";
+
+// const CartPage = ({ cart_items, total }) => {
+//     const { settings } = usePage().props;
+
+//     /* ===============================
+//        Quantity Update (Inertia)
+//     ================================ */
+//     const handleQuantityChange = (cartId, qty) => {
+//         router.post(
+//             route("cart.update"),
+//             {
+//                 cart_id: cartId,
+//                 quantity: qty,
+//             },
+//             {
+//                 preserveScroll: true,
+//                 onError: () => {
+//                     toast.error("Quantity update failed!");
+//                 },
+//             }
+//         );
+//     };
+
+//     /* ===============================
+//        Plus Button
+//     ================================ */
+//     const handlePlus = (id, currentQty, availableStock) => {
+//         const qty = Number(currentQty) || 0;
+//         const stock = Number(availableStock) || 0;
+
+//         if (qty >= stock) {
+//             toast.warn(`Only ${stock} item(s) available`);
+//             return;
+//         }
+
+//         handleQuantityChange(id, qty + 1);
+//     };
+
+//     /* ===============================
+//        Minus Button
+//     ================================ */
+//     const handleMinus = (id, currentQty) => {
+//         const qty = Number(currentQty) || 0;
+//         if (qty <= 1) return;
+
+//         handleQuantityChange(id, qty - 1);
+//     };
+
+//     /* ===============================
+//        Remove Item
+//     ================================ */
+//     const handleRemove = (id) => {
+//         // if (!confirm("Remove this item from cart?")) return;
+
+//         router.delete(route("cart.remove", id), {
+//             preserveScroll: true,
+//             onSuccess: () => {
+//                 toast.success("Item removed from cart");
+//             },
+//         });
+//     };
+
+//     return (
+//         <div className="min-h-screen py-8 bg-dark1">
+//             <div className="max-w-[1200px] mx-auto px-4 2xl:px-20">
+//                 <h1 className="text-xl md:text-3xl font-bold text-cream mb-8">
+//                     Your Shopping
+//                 </h1>
+
+//                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+//                     {/* ================= Cart Items ================= */}
+//                     <div className="md:col-span-2">
+//                         <div className="bg-dark2 rounded-lg shadow-md">
+//                             <div className="p-6 border-b border-gray/30">
+//                                 <h2 className="text-xl font-semibold text-gray">
+//                                     Cart Items ({cart_items?.length || 0})
+//                                 </h2>
+//                             </div>
+
+//                             {cart_items?.length === 0 ? (
+//                                 <div className="p-6 text-center text-gray">
+//                                     Your cart is empty
+//                                 </div>
+//                             ) : (
+//                                 cart_items.map((item) => {
+//                                     const thumb = item.product?.thumb_image
+//                                         ? `/${item.product.thumb_image}`
+//                                         : null;
+//                                     const front = item?.customization?.front_image
+//                                         ? `/${item.customization.front_image}`
+//                                         : null;
+//                                     const back = item?.customization?.back_image
+//                                         ? `/${item.customization.back_image}`
+//                                         : null;
+
+//                                     const availableStock = item.product?.qty || 0;
+
+//                                     return (
+//                                         <div
+//                                             key={item.id}
+//                                             className="p-6 flex flex-col sm:flex-row gap-6 border-b border-gray/30"
+//                                         >
+//                                             {/* Images */}
+//                                             <div className="flex gap-2">
+//                                                 {thumb && (
+//                                                     <img
+//                                                         src={thumb}
+//                                                         className="w-24 h-24 rounded"
+//                                                     />
+//                                                 )}
+//                                                 {front && (
+//                                                     <img
+//                                                         src={front}
+//                                                         className="w-24 h-24 rounded"
+//                                                     />
+//                                                 )}
+//                                                 {back && (
+//                                                     <img
+//                                                         src={back}
+//                                                         className="w-24 h-24 rounded"
+//                                                     />
+//                                                 )}
+//                                             </div>
+
+//                                             {/* Details */}
+//                                             <div className="flex-1">
+//                                                 <h3 className="text-lg font-medium text-cream">
+//                                                     {item.product?.name}
+//                                                 </h3>
+
+//                                                 <p className="text-gray font-bold">
+//                                                     {settings?.currency_icon}
+//                                                     {Number(item.price)}
+//                                                 </p>
+
+//                                                 {item?.customization?.price > 0 && (
+//                                                     <p className="text-sm text-gray">
+//                                                         Extra: {settings?.currency_icon}
+//                                                         {item.customization.price}
+//                                                     </p>
+//                                                 )}
+
+//                                                 {/* Quantity */}
+//                                                 <div className="flex items-center gap-3 mt-4">
+//                                                     <button
+//                                                         onClick={() =>
+//                                                             handleMinus(
+//                                                                 item.id,
+//                                                                 item.quantity
+//                                                             )
+//                                                         }
+//                                                         className="w-8 h-8 bg-gray-300 rounded"
+//                                                         disabled={item.quantity <= 1}
+//                                                     >
+//                                                         −
+//                                                     </button>
+
+//                                                     <span className="w-10 text-center text-cream">
+//                                                         {item.quantity}
+//                                                     </span>
+
+//                                                     <button
+//                                                         onClick={() =>
+//                                                             handlePlus(
+//                                                                 item.id,
+//                                                                 item.quantity,
+//                                                                 availableStock
+//                                                             )
+//                                                         }
+//                                                         className="w-8 h-8 bg-gray-300 rounded"
+//                                                     >
+//                                                         +
+//                                                     </button>
+
+//                                                     {/* Remove */}
+//                                                     <button
+//                                                         onClick={() =>
+//                                                             handleRemove(item.id)
+//                                                         }
+//                                                         className="text-red-600 ml-4"
+//                                                     >
+//                                                         <FaRegTrashAlt />
+//                                                     </button>
+//                                                 </div>
+//                                             </div>
+
+//                                             {/* Total */}
+//                                             <div className="text-cream font-bold">
+//                                                 {settings?.currency_icon}
+//                                                 {item.price * item.quantity}
+//                                             </div>
+//                                         </div>
+//                                     );
+//                                 })
+//                             )}
+//                         </div>
+//                     </div>
+
+//                     {/* ================= Summary ================= */}
+//                     <div>
+//                         <div className="bg-dark2 p-6 rounded-lg sticky top-8">
+//                             <div className="flex justify-between text-cream mb-4">
+//                                 <span>Subtotal</span>
+//                                 <span>
+//                                     {settings?.currency_icon}
+//                                     {total}
+//                                 </span>
+//                             </div>
+
+//                             <div className="flex justify-between text-xl font-bold text-cream border-t pt-4">
+//                                 <span>Total</span>
+//                                 <span>
+//                                     {settings?.currency_icon}
+//                                     {total}
+//                                 </span>
+//                             </div>
+
+//                             <button className="w-full mt-6 bg-green-600 text-white py-3 rounded">
+//                                 Proceed to Checkout
+//                             </button>
+//                         </div>
+//                     </div>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default CartPage;
+
+
+import React, { useEffect } from "react";
 import { toast } from "react-toastify";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { usePage, router } from "@inertiajs/react";
-import { Link } from "@inertiajs/react";
-import { route } from "ziggy-js";
+import { usePage } from "@inertiajs/react";
+import { useCartStore } from "../stores/cartStore"; // পাথ অনুযায়ী পরিবর্তন করো
 
-const CartPage = ({ cart_items, total }) => {
-    const { settings } = usePage().props;
+const CartPage = () => {
+  const { cart_items, total: serverTotal, settings } = usePage().props;
+  const { cartItems, total, setCart, increment, decrement, remove } = useCartStore();
 
-    /* ===============================
-       Quantity Update (Inertia)
-    ================================ */
-    const handleQuantityChange = (cartId, qty) => {
-        router.post(
-            route("cart.update"),
-            {
-                cart_id: cartId,
-                quantity: qty,
-            },
-            {
-                preserveScroll: true,
-                onError: () => {
-                    toast.error("Quantity update failed!");
-                },
-            }
-        );
-    };
+  // পেজ লোডে প্রথমবার সার্ভার থেকে ডাটা নিয়ে স্টোরে সেট করা
+  useEffect(() => {
+    if (cart_items?.length > 0) {
+      setCart(cart_items, serverTotal);
+    }
+  }, [cart_items, serverTotal]);
 
-    /* ===============================
-       Plus Button
-    ================================ */
-    const handlePlus = (id, currentQty, availableStock) => {
-        const qty = Number(currentQty) || 0;
-        const stock = Number(availableStock) || 0;
+  // স্টক চেক (যদি প্রোডাক্টের qty না থাকে তাহলে item.product.qty ব্যবহার করো)
+  const handlePlus = (id, currentQty, availableStock) => {
+    if (currentQty >= availableStock) {
+      toast.warn(`Only ${availableStock} item(s) available`);
+      return;
+    }
+    increment(id, availableStock);
+  };
 
-        if (qty >= stock) {
-            toast.warn(`Only ${stock} item(s) available`);
-            return;
-        }
+  const handleMinus = (id, currentQty) => {
+    if (currentQty <= 1) return;
+    decrement(id);
+  };
 
-        handleQuantityChange(id, qty + 1);
-    };
+  const handleRemove = (id) => {
+    if (!confirm("Remove this item?")) return;
+    remove(id);
+    toast.success("Item removed");
+  };
 
-    /* ===============================
-       Minus Button
-    ================================ */
-    const handleMinus = (id, currentQty) => {
-        const qty = Number(currentQty) || 0;
-        if (qty <= 1) return;
+  return (
+    <div className="min-h-screen py-8 bg-dark1">
+      <div className="max-w-[1200px] mx-auto px-4 2xl:px-20">
+        <h1 className="text-xl md:text-3xl font-bold text-cream mb-8">Your Shopping</h1>
 
-        handleQuantityChange(id, qty - 1);
-    };
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2">
+            <div className="bg-dark2 rounded-lg shadow-md">
+              <div className="p-6 border-b border-gray/30">
+                <h2 className="text-xl font-semibold text-gray">
+                  Cart Items ({cartItems.length})
+                </h2>
+              </div>
 
-    /* ===============================
-       Remove Item
-    ================================ */
-    const handleRemove = (id) => {
-        // if (!confirm("Remove this item from cart?")) return;
+              {cartItems.length === 0 ? (
+                <div className="p-6 text-center text-gray">Your cart is empty</div>
+              ) : (
+                cartItems.map((item) => {
+                  const thumb = item.product?.thumb_image ? `/${item.product.thumb_image}` : null;
+                  const front = item.customization?.front_image ? `/${item.customization.front_image}` : null;
+                  const back = item.customization?.back_image ? `/${item.customization.back_image}` : null;
+                  const availableStock = item.product?.qty || 999;
 
-        router.delete(route("cart.remove", id), {
-            preserveScroll: true,
-            onSuccess: () => {
-                toast.success("Item removed from cart");
-            },
-        });
-    };
+                  return (
+                    <div key={item.id} className="p-6 flex flex-col sm:flex-row gap-6 border-b border-gray/30">
+                      {/* Images */}
+                      <div className="flex gap-2">
+                        {thumb && <img src={thumb} className="w-24 h-24 rounded" />}
+                        {front && <img src={front} className="w-24 h-24 rounded" />}
+                        {back && <img src={back} className="w-24 h-24 rounded" />}
+                      </div>
 
-    return (
-        <div className="min-h-screen py-8 bg-dark1">
-            <div className="max-w-[1200px] mx-auto px-4 2xl:px-20">
-                <h1 className="text-xl md:text-3xl font-bold text-cream mb-8">
-                    Your Shopping
-                </h1>
+                      {/* Details */}
+                      <div className="flex-1">
+                        <h3 className="text-lg font-medium text-cream">{item.product?.name}</h3>
+                        <p className="text-gray font-bold">
+                          {settings?.currency_icon}{Number(item.price)}
+                        </p>
+                        {item?.customization?.price > 0 && (
+                          <p className="text-sm text-gray">
+                            Extra: {settings?.currency_icon}{item.customization.price}
+                          </p>
+                        )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* ================= Cart Items ================= */}
-                    <div className="md:col-span-2">
-                        <div className="bg-dark2 rounded-lg shadow-md">
-                            <div className="p-6 border-b border-gray/30">
-                                <h2 className="text-xl font-semibold text-gray">
-                                    Cart Items ({cart_items?.length || 0})
-                                </h2>
-                            </div>
-
-                            {cart_items?.length === 0 ? (
-                                <div className="p-6 text-center text-gray">
-                                    Your cart is empty
-                                </div>
-                            ) : (
-                                cart_items.map((item) => {
-                                    const thumb = item.product?.thumb_image
-                                        ? `/${item.product.thumb_image}`
-                                        : null;
-                                    const front = item?.customization?.front_image
-                                        ? `/${item.customization.front_image}`
-                                        : null;
-                                    const back = item?.customization?.back_image
-                                        ? `/${item.customization.back_image}`
-                                        : null;
-
-                                    const availableStock = item.product?.qty || 0;
-
-                                    return (
-                                        <div
-                                            key={item.id}
-                                            className="p-6 flex flex-col sm:flex-row gap-6 border-b border-gray/30"
-                                        >
-                                            {/* Images */}
-                                            <div className="flex gap-2">
-                                                {thumb && (
-                                                    <img
-                                                        src={thumb}
-                                                        className="w-24 h-24 rounded"
-                                                    />
-                                                )}
-                                                {front && (
-                                                    <img
-                                                        src={front}
-                                                        className="w-24 h-24 rounded"
-                                                    />
-                                                )}
-                                                {back && (
-                                                    <img
-                                                        src={back}
-                                                        className="w-24 h-24 rounded"
-                                                    />
-                                                )}
-                                            </div>
-
-                                            {/* Details */}
-                                            <div className="flex-1">
-                                                <h3 className="text-lg font-medium text-cream">
-                                                    {item.product?.name}
-                                                </h3>
-
-                                                <p className="text-gray font-bold">
-                                                    {settings?.currency_icon}
-                                                    {Number(item.price)}
-                                                </p>
-
-                                                {item?.customization?.price > 0 && (
-                                                    <p className="text-sm text-gray">
-                                                        Extra: {settings?.currency_icon}
-                                                        {item.customization.price}
-                                                    </p>
-                                                )}
-
-                                                {/* Quantity */}
-                                                <div className="flex items-center gap-3 mt-4">
-                                                    <button
-                                                        onClick={() =>
-                                                            handleMinus(
-                                                                item.id,
-                                                                item.quantity
-                                                            )
-                                                        }
-                                                        className="w-8 h-8 bg-gray-300 rounded"
-                                                        disabled={item.quantity <= 1}
-                                                    >
-                                                        −
-                                                    </button>
-
-                                                    <span className="w-10 text-center text-cream">
-                                                        {item.quantity}
-                                                    </span>
-
-                                                    <button
-                                                        onClick={() =>
-                                                            handlePlus(
-                                                                item.id,
-                                                                item.quantity,
-                                                                availableStock
-                                                            )
-                                                        }
-                                                        className="w-8 h-8 bg-gray-300 rounded"
-                                                    >
-                                                        +
-                                                    </button>
-
-                                                    {/* Remove */}
-                                                    <button
-                                                        onClick={() =>
-                                                            handleRemove(item.id)
-                                                        }
-                                                        className="text-red-600 ml-4"
-                                                    >
-                                                        <FaRegTrashAlt />
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            {/* Total */}
-                                            <div className="text-cream font-bold">
-                                                {settings?.currency_icon}
-                                                {item.price * item.quantity}
-                                            </div>
-                                        </div>
-                                    );
-                                })
-                            )}
+                        <div className="flex items-center gap-3 mt-4">
+                          <button
+                            onClick={() => handleMinus(item.id, item.quantity)}
+                            className="w-8 h-8 bg-gray-300 rounded"
+                            disabled={item.quantity <= 1}
+                          >
+                            −
+                          </button>
+                          <span className="w-10 text-center text-cream">{item.quantity}</span>
+                          <button
+                            onClick={() => handlePlus(item.id, item.quantity, availableStock)}
+                            className="w-8 h-8 bg-gray-300 rounded"
+                          >
+                            +
+                          </button>
+                          <button onClick={() => handleRemove(item.id)} className="text-red-600 ml-4">
+                            <FaRegTrashAlt />
+                          </button>
                         </div>
+                      </div>
+
+                      {/* Total */}
+                      <div className="text-cream font-bold">
+                        {settings?.currency_icon}{(item.price * item.quantity).toFixed(2)}
+                      </div>
                     </div>
-
-                    {/* ================= Summary ================= */}
-                    <div>
-                        <div className="bg-dark2 p-6 rounded-lg sticky top-8">
-                            <div className="flex justify-between text-cream mb-4">
-                                <span>Subtotal</span>
-                                <span>
-                                    {settings?.currency_icon}
-                                    {total}
-                                </span>
-                            </div>
-
-                            <div className="flex justify-between text-xl font-bold text-cream border-t pt-4">
-                                <span>Total</span>
-                                <span>
-                                    {settings?.currency_icon}
-                                    {total}
-                                </span>
-                            </div>
-
-                            <button className="w-full mt-6 bg-green-600 text-white py-3 rounded">
-                                Proceed to Checkout
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                  );
+                })
+              )}
             </div>
+          </div>
+
+          {/* Summary */}
+          <div>
+            <div className="bg-dark2 p-6 rounded-lg sticky top-8">
+              <div className="flex justify-between text-cream mb-4">
+                <span>Subtotal</span>
+                <span>{settings?.currency_icon}{total}</span>
+              </div>
+              <div className="flex justify-between text-xl font-bold text-cream border-t pt-4">
+                <span>Total</span>
+                <span>{settings?.currency_icon}{total}</span>
+              </div>
+              <button className="w-full mt-6 bg-green-600 text-white py-3 rounded">
+                Proceed to Checkout
+              </button>
+            </div>
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default CartPage;

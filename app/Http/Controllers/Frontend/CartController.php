@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\customerCustomization;
 use App\Models\Coupon;
 use App\Models\Promotion;
+use Illuminate\Support\Facades\DB;
 
 //working version of cart controller
 // class CartController extends Controller
@@ -853,5 +854,73 @@ class CartController extends Controller
         }
 
         return $applied;
+    }
+
+    // public function sync(Request $request)
+    // {
+    //     $request->validate([
+    //         'items' => 'required|array',
+    //         'items.*.id' => 'required|integer|exists:carts,id',
+    //         'items.*.quantity' => 'required|integer|min:1',
+    //     ]);
+
+    //     $userId = auth()->id();
+    //     $sessionId = session()->getId();
+
+    //     DB::transaction(function () use ($request, $userId, $sessionId) {
+    //         foreach ($request->items as $item) {
+    //             Cart::where('id', $item['id'])
+    //                 ->where(function ($q) use ($userId, $sessionId) {
+    //                     $q->when($userId, fn($qq) => $qq->where('user_id', $userId))
+    //                         ->when(!$userId, fn($qq) => $qq->where('session_id', $sessionId));
+    //                 })
+    //                 ->update(['quantity' => $item['quantity']]);
+    //         }
+    //     });
+
+    //     return response()->json(['success' => true]);
+    // }
+    public function sync(Request $request)
+    {
+        // শুধু 'items' অ্যারে চেক করো, খালি হলেও অ্যালাউ করো
+        $request->validate([
+            'items' => 'present|array', // এটাই যথেষ্ট
+        ]);
+
+        $userId = auth()->id();
+        $sessionId = session()->getId();
+
+        DB::transaction(function () use ($request, $userId, $sessionId) {
+            // যদি items খালি হয় তাহলে সব কার্ট আইটেম ডিলিট করো (অপশনাল, কিন্তু ভালো)
+            if (empty($request->items)) {
+                Cart::where(function ($q) use ($userId, $sessionId) {
+                    $q->when($userId, fn($qq) => $qq->where('user_id', $userId))
+                        ->when(!$userId, fn($qq) => $qq->where('session_id', $sessionId));
+                })->delete();
+
+                return; // ট্রানজেকশন শেষ
+            }
+
+            // আইটেম আপডেট করা
+            foreach ($request->items as $item) {
+                Cart::where('id', $item['id'])
+                    ->where(function ($q) use ($userId, $sessionId) {
+                        $q->when($userId, fn($qq) => $qq->where('user_id', $userId))
+                            ->when(!$userId, fn($qq) => $qq->where('session_id', $sessionId));
+                    })
+                    ->update(['quantity' => $item['quantity']]);
+            }
+
+            // অবশিষ্ট আইটেম ডিলিট করা (যেগুলো sync-এ পাঠানো হয়নি)
+            $syncedIds = collect($request->items)->pluck('id')->toArray();
+            Cart::whereNotIn('id', $syncedIds)
+                ->where(function ($q) use ($userId, $sessionId) {
+                    $q->when($userId, fn($qq) => $qq->where('user_id', $userId))
+                        ->when(!$userId, fn($qq) => $qq->where('session_id', $sessionId));
+                })
+                ->delete();
+        });
+
+        return response()->json(['success' => true]);
     }
 }

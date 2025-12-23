@@ -101,6 +101,7 @@ Route::prefix('cart')->name('cart.')->group(function () {
     Route::delete('/clear', [CartController::class, 'clearCart'])
         ->name('clear');
 });
+Route::post('/cart/sync', [CartController::class, 'sync'])->name('cart.sync');
 
 // Route::middleware(['web', 'auth', 'verified', 'check.permission'])->prefix('admin')->name('admin.')->group(function () {
 //     /** admin routes */
