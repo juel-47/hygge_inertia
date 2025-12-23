@@ -1,101 +1,395 @@
+// import { create } from 'zustand';
+// import { persist } from 'zustand/middleware';
+// import axios from 'axios';
+// import debounce from 'lodash/debounce';
+
+// export const useCartStore = create(
+//   persist(
+//     (set, get) => ({
+//       cartItems: [],
+//       total: 0,
+
+//       // Cart 
+//       setCart: (items, total) => {
+//         set({ cartItems: items.map(item => ({ ...item, id: item.id })), total });
+//       },
+
+//       // Increment
+//       increment: (cartId, availableStock) => {
+//         set((state) => {
+//           const newItems = state.cartItems.map((item) => {
+//             if (item.id === cartId) {
+//               const newQty = item.quantity + 1;
+//               if (newQty > availableStock) return item; 
+//               return { ...item, quantity: newQty };
+//             }
+//             return item;
+//           });
+
+//           const newTotal = newItems.reduce(
+//             (sum, i) => sum + i.price * i.quantity,
+//             0
+//           );
+
+//           return { cartItems: newItems, total: newTotal.toFixed(2) };
+//         });
+//         debouncedSync(); 
+//       },
+
+//       // Decrement ()
+//       decrement: (cartId) => {
+//         set((state) => {
+//           const newItems = state.cartItems
+//             .map((item) => {
+//               if (item.id === cartId && item.quantity > 1) {
+//                 return { ...item, quantity: item.quantity - 1 };
+//               }
+//               return item;
+//             })
+//             .filter((item) => item.quantity >= 1); 
+
+//           const newTotal = newItems.reduce(
+//             (sum, i) => sum + i.price * i.quantity,
+//             0
+//           );
+
+//           return { cartItems: newItems, total: newTotal.toFixed(2) };
+//         });
+//         debouncedSync();
+//       },
+
+//       // Remove
+//       remove: (cartId) => {
+//         set((state) => {
+//           const newItems = state.cartItems.filter((item) => item.id !== cartId);
+//           const newTotal = newItems.reduce(
+//             (sum, i) => sum + i.price * i.quantity,
+//             0
+//           );
+
+//           return { cartItems: newItems, total: newTotal.toFixed(2) };
+//         });
+//         debouncedSync();
+//       },
+
+//       // sync (debounce)
+//       syncCart: async () => {
+//         const items = get().cartItems.map((item) => ({
+//           id: item.id,
+//           quantity: item.quantity,
+//         }));
+
+//         try {
+//           await axios.post(route('cart.sync'), { items });
+
+//         } catch (err) {
+//           console.error('Cart sync failed:', err);
+
+//         }
+//       },
+//     }),
+//     {
+//       name: 'cart-storage', 
+//       partialize: (state) => ({ cartItems: state.cartItems, total: state.total }),
+//     }
+//   )
+// );
+
+// // debounce sync
+// const debouncedSync = debounce(() => {
+//   useCartStore.getState().syncCart();
+// }, 800); 
+
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import axios from 'axios';
-import debounce from 'lodash/debounce'; // npm install lodash
+import debounce from 'lodash/debounce';
 
 export const useCartStore = create(
   persist(
     (set, get) => ({
+      /* =====================
+         STATE
+      ====================== */
       cartItems: [],
       total: 0,
+      cartCount: 0,
 
-      // Cart লোড করার সময় (পেজ লোডে)
-      setCart: (items, total) => {
-        set({ cartItems: items.map(item => ({ ...item, id: item.id })), total });
+      /* =====================
+         HELPERS
+      ====================== */
+      recalculate: (items) => {
+        const total = items.reduce(
+          (sum, i) => sum + i.price * i.quantity,
+          0
+        );
+
+        const count = items.reduce(
+          (sum, i) => sum + i.quantity,
+          0
+        );
+
+        return {
+          cartItems: items,
+          total: total.toFixed(2),
+          cartCount: count,
+        };
       },
 
-      // Increment (প্লাস)
+      /* =====================
+         SET CART (FROM SERVER)
+      ====================== */
+      setCart: (items) => {
+        const state = get().recalculate(items);
+        set(state);
+      },
+
+      /* =====================
+         INCREMENT
+      ====================== */
       increment: (cartId, availableStock) => {
         set((state) => {
-          const newItems = state.cartItems.map((item) => {
+          const items = state.cartItems.map((item) => {
             if (item.id === cartId) {
-              const newQty = item.quantity + 1;
-              if (newQty > availableStock) return item; // স্টক চেক
-              return { ...item, quantity: newQty };
+              const qty = item.quantity + 1;
+              if (qty > availableStock) return item;
+              return { ...item, quantity: qty };
             }
             return item;
           });
 
-          const newTotal = newItems.reduce(
-            (sum, i) => sum + i.price * i.quantity,
-            0
-          );
-
-          return { cartItems: newItems, total: newTotal.toFixed(2) };
+          return state.recalculate(items);
         });
-        debouncedSync(); // debounce sync
+
+        debouncedSync();
       },
 
-      // Decrement (মাইনাস)
+      /* =====================
+         DECREMENT
+      ====================== */
       decrement: (cartId) => {
         set((state) => {
-          const newItems = state.cartItems
-            .map((item) => {
-              if (item.id === cartId && item.quantity > 1) {
-                return { ...item, quantity: item.quantity - 1 };
-              }
-              return item;
-            })
-            .filter((item) => item.quantity >= 1); // ১ এর নিচে গেলে রাখবো না
+          const items = state.cartItems
+            .map((item) =>
+              item.id === cartId && item.quantity > 1
+                ? { ...item, quantity: item.quantity - 1 }
+                : item
+            )
+            .filter((item) => item.quantity >= 1);
 
-          const newTotal = newItems.reduce(
-            (sum, i) => sum + i.price * i.quantity,
-            0
-          );
-
-          return { cartItems: newItems, total: newTotal.toFixed(2) };
+          return state.recalculate(items);
         });
+
         debouncedSync();
       },
 
-      // Remove
+      /* =====================
+         REMOVE ITEM
+      ====================== */
       remove: (cartId) => {
         set((state) => {
-          const newItems = state.cartItems.filter((item) => item.id !== cartId);
-          const newTotal = newItems.reduce(
-            (sum, i) => sum + i.price * i.quantity,
-            0
+          const items = state.cartItems.filter(
+            (item) => item.id !== cartId
           );
 
-          return { cartItems: newItems, total: newTotal.toFixed(2) };
+          return state.recalculate(items);
         });
-        debouncedSync();
+
+        axios.delete(route('cart.remove', cartId));
       },
 
-      // সার্ভারে sync করা (debounce)
-      syncCart: async () => {
-        const items = get().cartItems.map((item) => ({
-          id: item.id,
-          quantity: item.quantity,
-        }));
+      /* =====================
+         CLEAR CART
+      ====================== */
+      clearCart: () => {
+        set({
+          cartItems: [],
+          total: 0,
+          cartCount: 0,
+        });
 
+        axios.post(route('cart.clear'));
+      },
+
+      /* =====================
+         SYNC WITH BACKEND
+      ====================== */
+      syncCart: async () => {
         try {
-          await axios.post(route('cart.sync'), { items });
-          // sync সফল হলে কোনো কিছু করার দরকার নেই (কারণ ফ্রন্টএন্ডে আলরেডি আপডেট হয়ে গেছে)
-        } catch (err) {
-          console.error('Cart sync failed:', err);
-          // ইচ্ছা করলে rollback করতে পারো
+          await axios.post(route('cart.sync'), {
+            items: get().cartItems.map((i) => ({
+              id: i.id,
+              quantity: i.quantity,
+            })),
+          });
+        } catch (e) {
+          console.error('Cart sync failed', e);
         }
       },
     }),
     {
-      name: 'cart-storage', // localStorage-এ সেভ হবে
-      partialize: (state) => ({ cartItems: state.cartItems, total: state.total }),
+      name: 'cart-storage',
+      partialize: (state) => ({
+        cartItems: state.cartItems,
+        total: state.total,
+        cartCount: state.cartCount,
+      }),
     }
   )
 );
 
-// debounce sync
+/* =====================
+   DEBOUNCED SYNC
+====================== */
 const debouncedSync = debounce(() => {
   useCartStore.getState().syncCart();
-}, 800); // ৮০০ ms পর sync
+}, 700);
+
+
+
+
+// import { create } from "zustand";
+// import { persist } from "zustand/middleware";
+// import axios from "axios";
+// import debounce from "lodash/debounce";
+
+// export const useCartStore = create(
+//   persist(
+//     (set, get) => ({
+//       cartItems: [],
+//       total: 0,
+//       count: 0,
+
+//       /* ======================
+//          ADD TO CART
+//       ====================== */
+//       addToCart: (newItem) => {
+//         set((state) => {
+//           const existing = state.cartItems.find(
+//             (i) => i.product_id === newItem.product_id
+//           );
+
+//           let updatedItems;
+
+//           if (existing) {
+//             // একই product হলে quantity বাড়াও
+//             updatedItems = state.cartItems.map((i) =>
+//               i.product_id === newItem.product_id
+//                 ? { ...i, quantity: i.quantity + 1 }
+//                 : i
+//             );
+//           } else {
+//             updatedItems = [
+//               ...state.cartItems,
+//               { ...newItem, quantity: 1 },
+//             ];
+//           }
+
+//           return {
+//             cartItems: updatedItems,
+//             total: calcTotal(updatedItems),
+//             count: calcCount(updatedItems),
+//           };
+//         });
+//         debouncedSync();
+//       },
+
+//       /* ======================
+//          INCREMENT
+//       ====================== */
+//       increment: (productId, stock) => {
+//         set((state) => {
+//           const items = state.cartItems.map((i) =>
+//             i.product_id === productId && i.quantity < stock
+//               ? { ...i, quantity: i.quantity + 1 }
+//               : i
+//           );
+//           return {
+//             cartItems: items,
+//             total: calcTotal(items),
+//             count: calcCount(items),
+//           };
+//         });
+//         debouncedSync();
+//       },
+
+//       /* ======================
+//          DECREMENT
+//       ====================== */
+//       decrement: (productId) => {
+//         set((state) => {
+//           const items = state.cartItems
+//             .map((i) =>
+//               i.product_id === productId && i.quantity > 1
+//                 ? { ...i, quantity: i.quantity - 1 }
+//                 : i
+//             )
+//             .filter((i) => i.quantity > 0);
+
+//           return {
+//             cartItems: items,
+//             total: calcTotal(items),
+//             count: calcCount(items),
+//           };
+//         });
+//         debouncedSync();
+//       },
+
+//       /* ======================
+//          REMOVE ITEM
+//       ====================== */
+//       remove: (productId) => {
+//         set((state) => {
+//           const items = state.cartItems.filter(
+//             (i) => i.product_id !== productId
+//           );
+//           return {
+//             cartItems: items,
+//             total: calcTotal(items),
+//             count: calcCount(items),
+//           };
+//         });
+//         debouncedSync();
+//       },
+
+//       /* ======================
+//          SYNC TO BACKEND
+//       ====================== */
+//       syncCart: async () => {
+//         const payload = get().cartItems.map((i) => ({
+//           product_id: i.product_id,
+//           quantity: i.quantity,
+//         }));
+
+//         try {
+//           await axios.post(route("cart.sync"), { items: payload });
+//         } catch (e) {
+//           console.error("Cart sync failed:", e);
+//         }
+//       },
+//     }),
+//     {
+//       name: "cart-storage",
+//       onRehydrateStorage: () => (state) => {
+//         if (state) {
+//           state.count = calcCount(state.cartItems);
+//           state.total = calcTotal(state.cartItems);
+//         }
+//       },
+//     }
+//   )
+// );
+
+// /* ======================
+//    HELPERS
+// ====================== */
+// const calcTotal = (items) =>
+//   items.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2);
+
+// const calcCount = (items) =>
+//   items.reduce((s, i) => s + i.quantity, 0);
+
+// const debouncedSync = debounce(() => {
+//   useCartStore.getState().syncCart();
+// }, 800);

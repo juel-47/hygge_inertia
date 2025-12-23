@@ -5,10 +5,12 @@ import { FaChevronDown, FaBars } from "react-icons/fa6";
 import { GrBasket } from "react-icons/gr";
 import { Link, usePage } from "@inertiajs/react";
 import { route } from "ziggy-js";
+import { useCartStore } from '../../stores/cartStore';
 
 const Navbar = () => {
-     const { categories } = usePage().props; 
-    // console.log(categories);
+     const { categories } = usePage().props;
+     const cartCount = useCartStore((s) => s.cartCount); 
+    // console.log(cartCount);
     // const dispatch = useDispatch();
     // const navigate = useNavigate();
     const mobileMenuRef = useRef(null);
@@ -257,11 +259,11 @@ const Navbar = () => {
                         <li className="text-cream relative">
                             <Link href="/cart">
                                 <GrBasket size={35} />
-
+                                {cartCount > 0 && (
                                     <div className="absolute -top-2 font-mont -right-2 w-5 h-5 rounded-full bg-red text-cream flex justify-center items-center text-xs">
-                                       10
+                                       {cartCount}
                                     </div>
-
+                                    )}
                             </Link>
                         </li>
                     </ul>

@@ -5,30 +5,17 @@ import { toast } from "react-toastify";
 import { Link, usePage } from "@inertiajs/react";
 import { route } from "ziggy-js";
 import { router } from "@inertiajs/react";
+// import { useCartStore } from '../stores/cartStore';
+
 
 const ProductCardTwo = ({ product }) => {
+    // const cartCount = useCartStore((s) => s.cartCount); 
     const [quantity, setQuantity] = useState(1);
     const [isHovered, setIsHovered] = useState(false);
 
     const isOutOfStock = !product.qty || product.qty <= 0;
     const hasOptions =
         product?.colors?.length > 0 || product?.sizes?.length > 0;
-
-    // const handleAddToCart = async () => {
-    //     if (isOutOfStock) {
-    //         toast.error("This product is out of stock!");
-    //         return;
-    //     }
-
-    //     try {
-    //         const cartItem = { product_id: product.id, qty: quantity };
-    //         await addToCart(cartItem).unwrap();
-    //         refetch();
-    //         toast.success("Product added to cart!");
-    //     } catch (err) {
-    //         toast.error(err?.data?.message || "Failed to add to cart");
-    //     }
-    // };
 
     const [message, setMessage] = useState("");
 
@@ -195,3 +182,147 @@ const ProductCardTwo = ({ product }) => {
 };
 
 export default ProductCardTwo;
+
+
+// import React, { useState } from "react";
+// import { GoArrowRight } from "react-icons/go";
+// import { toast } from "react-toastify";
+// import { Link } from "@inertiajs/react";
+// import { route } from "ziggy-js";
+// import axios from "axios";
+// import { useCartStore } from "../stores/cartStore";
+
+// const ProductCardTwo = ({ product }) => {
+//     const [isHovered, setIsHovered] = useState(false);
+
+//     const addToCartStore = useCartStore((state) => state.addToCart);
+
+//     const isOutOfStock = !product?.qty || product.qty <= 0;
+//     const hasOptions =
+//         (product?.colors?.length ?? 0) > 0 ||
+//         (product?.sizes?.length ?? 0) > 0;
+
+//     const handleAddToCart = async () => {
+//         if (isOutOfStock) {
+//             toast.error("This product is out of stock!");
+//             return;
+//         }
+
+//         /* ============================
+//            1️⃣ INSTANT UI UPDATE (Zustand)
+//         ============================ */
+//         addToCartStore({
+//             id: `local-${product.id}`, // temporary id
+//             product_id: product.id,
+//             product: product,
+//             quantity: 1,
+//             price: product.offer_price ?? product.price,
+//         });
+
+//         toast.success("Product added to cart!");
+
+//         /* ============================
+//            2️⃣ BACKEND SYNC (Silent)
+//         ============================ */
+//         try {
+//             await axios.post(route("cart.add"), {
+//                 product_id: product.id,
+//                 qty: 1,
+//                 size_id: null,
+//                 color_id: null,
+//                 customization_id: null,
+//             });
+//         } catch (error) {
+//             console.error(error);
+//             toast.error("Cart sync failed!");
+//         }
+//     };
+
+//     return (
+//         <div className="w-full mx-auto transition-all duration-500 overflow-hidden hover:-translate-y-1 relative">
+//             {/* Out of Stock Badge */}
+//             {isOutOfStock && (
+//                 <div className="absolute top-3 left-3 z-10 bg-red text-cream text-xs font-semibold px-3 py-1 rounded-full">
+//                     Out of Stock
+//                 </div>
+//             )}
+
+//             {/* Image */}
+//             <div
+//                 className={`relative overflow-hidden rounded-xl ${
+//                     isOutOfStock ? "opacity-70" : ""
+//                 }`}
+//                 onMouseEnter={() => setIsHovered(true)}
+//                 onMouseLeave={() => setIsHovered(false)}
+//             >
+//                 <img
+//                     src={`/${product?.thumb_image}`}
+//                     alt={product?.name}
+//                     loading="lazy"
+//                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105 rounded-xl"
+//                 />
+
+//                 {/* Hover Actions */}
+//                 {isHovered && (
+//                     <div className="absolute inset-0 bg-dark2/70 flex items-center justify-center">
+//                         <div className="flex flex-col space-y-3">
+//                             {isOutOfStock ? (
+//                                 <button
+//                                     disabled
+//                                     className="w-full flex justify-between items-center text-sm border border-red bg-red/80 text-cream rounded-[10px] px-4 py-2 cursor-not-allowed"
+//                                 >
+//                                     Out of Stock <GoArrowRight />
+//                                 </button>
+//                             ) : !hasOptions ? (
+//                                 <button
+//                                     onClick={handleAddToCart}
+//                                     className="w-full flex justify-between items-center text-sm border border-transparent hover:border-cream rounded-[10px] text-cream px-4 py-2"
+//                                 >
+//                                     Add to cart <GoArrowRight />
+//                                 </button>
+//                             ) : (
+//                                 <Link
+//                                     href={`/product-detail/${product?.slug}`}
+//                                     className="w-full flex justify-between items-center text-sm bg-red rounded-[10px] text-cream px-4 py-2"
+//                                 >
+//                                     Select Option <GoArrowRight />
+//                                 </Link>
+//                             )}
+
+//                             <Link
+//                                 href={`/product-details/${product?.slug}`}
+//                                 className="w-full flex justify-between items-center text-sm bg-dark2 rounded-[10px] text-cream px-4 py-2"
+//                             >
+//                                 Details <GoArrowRight />
+//                             </Link>
+//                         </div>
+//                     </div>
+//                 )}
+//             </div>
+
+//             {/* Product Info */}
+//             <div className="px-2 mt-2">
+//                 <h4 className="text-cream text-sm font-semibold mb-2 truncate">
+//                     <Link href={`/product-details/${product?.slug}`}>
+//                         {product?.name}
+//                     </Link>
+//                 </h4>
+
+//                 <div>
+//                     <p className="text-cream text-sm">
+//                         {product?.offer_price ?? product?.price}
+//                     </p>
+//                     {product?.offer_price && (
+//                         <p className="text-red line-through text-xs">
+//                             {product?.price}
+//                         </p>
+//                     )}
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default ProductCardTwo;
+
+
