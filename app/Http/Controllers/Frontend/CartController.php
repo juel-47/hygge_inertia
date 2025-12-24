@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\customerCustomization;
 use App\Models\Coupon;
 use App\Models\Promotion;
+use App\Traits\ImageUploadTrait;
 use Illuminate\Support\Facades\DB;
 
 //working version of cart controller
@@ -447,6 +448,7 @@ use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
+    use ImageUploadTrait;
     /* =========================
         ADD TO CART
     ========================= */
