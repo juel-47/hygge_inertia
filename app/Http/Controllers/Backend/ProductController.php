@@ -51,6 +51,118 @@ class ProductController extends Controller
      * Store a newly created resource in storage.
      */
 
+// public function store(ProductCreateRequest $request)
+// {
+//     /** ensure array exists */
+//     $proColors = $request->proColor ?? [];
+//     $colorImages = $request->file('color_image') ?? [];
+
+//     /** COLOR + IMAGE VALIDATION */
+//     foreach ($proColors as $index => $color_id) {
+
+//         $imageFile = $colorImages[$index] ?? null;
+
+//         // color selected but no image
+//         if ($color_id && !$imageFile) {
+//             Toastr::error("Color image is required when a color is selected!", "Error");
+//             return back()->withInput();
+//         }
+
+//         // image uploaded but no color
+//         if (!$color_id && $imageFile) {
+//             Toastr::error("Please select a color for the uploaded image!", "Error");
+//             return back()->withInput();
+//         }
+//     }
+
+//     /** PRODUCT CREATE */
+//     $lastId = (Product::max('id') ?? 0) + 1;
+//     $productCode = 'P' . str_pad($lastId, 4, '0', STR_PAD_LEFT);
+
+//     $imagePath = $this->upload_image($request, 'image', 'uploads/products');
+
+//     $product = new Product();
+//     $product->thumb_image = $imagePath;
+//     $product->name = $request->name;
+//     $product->slug = Str::slug($request->name);
+//     $product->category_id = $request->category;
+//     $product->sub_category_id = $request->sub_category;
+//     $product->child_category_id = $request->child_category;
+//     $product->brand_id = $request->brand;
+//     $product->qty = $request->qty;
+//     $product->short_description = $request->short_description;
+//     $product->long_description = $request->long_description;
+//     $product->video_link = $request->video_link;
+//     $product->sku = $request->sku;
+//     $product->purchase_price = $request->purchase_price ?? null;
+//     $product->price = $request->price;
+//     $product->offer_price = $request->offer_price;
+//     $product->offer_start_date = $request->offer_start_date;
+//     $product->offer_end_date = $request->offer_end_date;
+//     $product->product_type = $request->product_type;
+//     $product->status = $request->status;
+//     $product->meta_title = $request->meta_title;
+//     $product->meta_description = $request->meta_description;
+//     $product->created_by = auth()->id();
+//     $product->product_code = $productCode;
+//     $product->is_approved = auth()->user()->hasRole('SuperAdmin') || auth()->user()->hasRole('Admin') ? 1 : 0;
+//     $product->save();
+
+
+//     /** COLOR IMAGE UPLOAD (SAFE FIXED VERSION) */
+//     foreach ($proColors as $index => $color_id) {
+
+//         if (!$color_id) continue;
+
+//         $imageFile = $colorImages[$index] ?? null;
+//         if (!$imageFile) continue;
+
+//         // ensure folder exists
+//         $path = public_path('uploads/image-gallery');
+//         if (!file_exists($path)) {
+//             mkdir($path, 0777, true);
+//         }
+
+//         $ext = $imageFile->getClientOriginalExtension();
+//         $imageName = 'media_' . uniqid() . '.' . $ext;
+//         $imageFile->move($path, $imageName);
+
+//         ProductImageGallery::create([
+//             'product_id' => $product->id,
+//             'color_id'   => $color_id,
+//             'image'      => 'uploads/image-gallery/' . $imageName,
+//         ]);
+//     }
+
+
+//     /** CUSTOMIZATION */
+//     $isCustomizable = $request->input('is_customizable', 0);
+
+//     if ($isCustomizable) {
+//         $frontPath = $request->hasFile('front_image')
+//             ? $this->upload_image($request, 'front_image', 'uploads/customize')
+//             : null;
+
+//         $backPath = $request->hasFile('back_image')
+//             ? $this->upload_image($request, 'back_image', 'uploads/customize')
+//             : null;
+
+//         $product->customization()->updateOrCreate(
+//             ['product_id' => $product->id],
+//             [
+//                 'is_customizable' => 1,
+//                 'front_image'     => $frontPath,
+//                 'back_image'      => $backPath,
+//                 'front_price'     => $request->input('front_price', 0)  ?: 0,
+//                 'back_price'      => $request->input('back_price', 0) ?: 0,
+//                 'both_price'      => $request->input('both_price', 0)  ?: 0,
+//             ]
+//         );
+//     }
+
+//     Toastr::success('Created Product Successfully!', 'success');
+//     return redirect()->route('admin.products.index');
+// }
 public function store(ProductCreateRequest $request)
 {
     /** ensure array exists */
@@ -59,7 +171,6 @@ public function store(ProductCreateRequest $request)
 
     /** COLOR + IMAGE VALIDATION */
     foreach ($proColors as $index => $color_id) {
-
         $imageFile = $colorImages[$index] ?? null;
 
         // color selected but no image
@@ -108,16 +219,39 @@ public function store(ProductCreateRequest $request)
     $product->is_approved = auth()->user()->hasRole('SuperAdmin') || auth()->user()->hasRole('Admin') ? 1 : 0;
     $product->save();
 
+    $sizesToSync  = [];
+    $colorsToSync = [];
 
-    /** COLOR IMAGE UPLOAD (SAFE FIXED VERSION) */
+    if ($request->filled('variants') && is_array($request->variants)) {
+        foreach ($request->variants as $variant) {
+            // Size 
+            if (!empty($variant['size_id'])) {
+                $sizesToSync[$variant['size_id']] = [
+                    'size_price' => $variant['price'] ?? 0,
+                ];
+            }
+
+            // Color 
+            if (!empty($variant['color_id'])) {
+                $colorsToSync[$variant['color_id']] = [
+                    'color_price' => $variant['price'] ?? 0,
+                ];
+            }
+        }
+
+        // Sync sizes and colors
+        $product->sizes()->sync($sizesToSync);
+        $product->colors()->sync($colorsToSync);
+    }
+    // ======================================================================
+
+    /** COLOR IMAGE UPLOAD */
     foreach ($proColors as $index => $color_id) {
-
         if (!$color_id) continue;
 
         $imageFile = $colorImages[$index] ?? null;
         if (!$imageFile) continue;
 
-        // ensure folder exists
         $path = public_path('uploads/image-gallery');
         if (!file_exists($path)) {
             mkdir($path, 0777, true);
@@ -133,7 +267,6 @@ public function store(ProductCreateRequest $request)
             'image'      => 'uploads/image-gallery/' . $imageName,
         ]);
     }
-
 
     /** CUSTOMIZATION */
     $isCustomizable = $request->input('is_customizable', 0);
@@ -154,8 +287,8 @@ public function store(ProductCreateRequest $request)
                 'front_image'     => $frontPath,
                 'back_image'      => $backPath,
                 'front_price'     => $request->input('front_price', 0)  ?: 0,
-                'back_price'      => $request->input('back_price', 0) ?: 0,
-                'both_price'      => $request->input('both_price', 0)  ?: 0,
+                'back_price'      => $request->input('back_price', 0)   ?: 0,
+                'both_price'      => $request->input('both_price', 0)   ?: 0,
             ]
         );
     }

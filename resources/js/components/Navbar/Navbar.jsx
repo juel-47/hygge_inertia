@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 
+
 import { IoSearchSharp } from "react-icons/io5";
 import { FaChevronDown, FaBars } from "react-icons/fa6";
 import { GrBasket } from "react-icons/gr";
@@ -9,7 +10,12 @@ import { useCartStore } from '../../stores/cartStore';
 
 const Navbar = () => {
      const { categories } = usePage().props;
-     const cartCount = useCartStore((s) => s.cartCount); 
+     const cartCount = useCartStore((s) => s.cartCount);
+     const { auth } = usePage().props;
+
+
+    const customer = auth?.user; 
+    console.log('customer', customer);
     // console.log(cartCount);
     // const dispatch = useDispatch();
     // const navigate = useNavigate();
@@ -216,17 +222,17 @@ const Navbar = () => {
                                     className="flex items-center gap-2 cursor-pointer"
                                     onClick={toggleProfileDropdown}
                                 >
-                                    {/* <img
-                                        src={`${user.data.image}`}
+                                     <img
+                                        src={`${customer.image}`}
                                         alt="Profile"
                                         className="w-8 h-8 rounded-full object-cover border border-cream"
-                                    /> */}
-                                    <span className="text-cream text-md hidden sm:block font-mont">
-                                        Sirajul
+                                    />  
+                                     <span className="text-cream text-md hidden sm:block font-mont">
+                                        {customer.name}
                                     </span>
                                 </div>
 
-                                    {/* <ul className="absolute top-[120%] right-0 bg-cream w-[150px] p-4 rounded-lg shadow-lg z-30">
+                                      <ul className="absolute top-[120%] right-0 bg-cream w-[150px] p-4 rounded-lg shadow-lg z-30">
                                         <li>
                                             <Link
                                                 href="/profile"
@@ -248,12 +254,12 @@ const Navbar = () => {
                                                 Logout
                                             </button>
                                         </li>
-                                    </ul> */}
+                                    </ul> 
 
                             </li>
 
                             <li className="text-cream text-md hidden lg:block font-mont">
-                                <Link href="/signin">SIGN IN</Link>
+                                <Link href={route('customer.login')}>SIGN IN</Link>
                             </li>
 
                         <li className="text-cream relative">

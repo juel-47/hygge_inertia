@@ -488,9 +488,9 @@ class CartController extends Controller
         $basePrice = $product->offer_price ?? $product->price;
 
         /* Auth / Session */
-        $userId = auth()->id();
+        $userId = auth('customer')->id();
         $sessionId = session()->getId();
-
+        // dd('user_id',$userId, 'session_id'.$sessionId);
         /* Customization */
         $extraPrice = 0;
         $frontImage = $backImage = null;
@@ -701,7 +701,7 @@ class CartController extends Controller
     // }
     public function removeCart($id)
     {
-        $userId = auth()->id();
+        $userId = auth('customer')->id();
         $sessionId = session()->getId();
 
         $cart = Cart::where('id', $id)
@@ -754,7 +754,7 @@ class CartController extends Controller
     // }
     public function clearCart()
     {
-        $userId = auth()->id();
+        $userId = auth('customer')->id();
         $sessionId = session()->getId();
 
         $cartItems = Cart::where(function ($q) use ($userId, $sessionId) {
@@ -782,7 +782,7 @@ class CartController extends Controller
     ========================= */
     private function currentCart()
     {
-        $userId = auth()->id();
+        $userId = auth('customer')->id();
         $sessionId = session()->getId();
 
         return Cart::with('product')
@@ -795,7 +795,7 @@ class CartController extends Controller
     ========================= */
     private function applyPromotions()
     {
-        $userId = auth()->id();
+        $userId = auth('customer')->id();
         $sessionId = session()->getId();
         $cartItems = $this->currentCart();
 
@@ -889,7 +889,7 @@ class CartController extends Controller
             'items' => 'present|array', // এটাই যথেষ্ট
         ]);
 
-        $userId = auth()->id();
+        $userId = auth('customer')->id();
         $sessionId = session()->getId();
 
         DB::transaction(function () use ($request, $userId, $sessionId) {

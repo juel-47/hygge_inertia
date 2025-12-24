@@ -46,6 +46,7 @@ use App\Http\Controllers\Backend\SizeController;
 use App\Http\Controllers\Backend\StateController;
 use App\Http\Controllers\Backend\TransactionController;
 use App\Http\Controllers\Backend\UserController;
+use App\Http\Controllers\Frontend\AuthController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\CustomerCustomizationController;
 use App\Http\Controllers\Frontend\FrontendController;
@@ -65,6 +66,29 @@ use Intervention\Image\Facades\Image;
 // Route::get('/', fn() => view('welcome'))->name('welcome');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+//auth user or customer
+Route::middleware('guest:customer')->group(function () {
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+
+    Route::get('/customer/login', [AuthController::class, 'showLogin'])->name('customer.login');
+    Route::post('/customer-login', [AuthController::class, 'login'])->name('customer.login.submit');
+
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
+
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
+    Route::post('/email/verification-resend', [AuthController::class, 'resendVerification'])->name('verification.resend');
+});
+
+Route::get('/email/verify/{id}', [AuthController::class, 'verifyEmail'])
+    ->name('verification.verify')
+    ->middleware('signed');
+
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:customer');
 
 // ===== Product Detail =====
 //product details:
