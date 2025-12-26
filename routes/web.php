@@ -52,6 +52,7 @@ use App\Http\Controllers\Frontend\CheckOutController;
 use App\Http\Controllers\Frontend\CustomerCustomizationController;
 use App\Http\Controllers\Frontend\FrontendController;
 use App\Http\Controllers\Frontend\HomeController;
+use App\Http\Controllers\Frontend\PaymentController;
 use App\Models\Order;
 use App\Models\Slider;
 use Illuminate\Support\Facades\Cache;
@@ -140,6 +141,13 @@ Route::prefix('cart')->name('cart.')->group(function () {
         ->name('clear');
 });
 Route::post('/cart/sync', [CartController::class, 'sync'])->name('cart.sync');
+//check out controller
+Route::post('/checkout', [PaymentController::class, 'store'])
+    ->name('checkout.store')->middleware('auth:customer');
+
+Route::get('/order/success', [CheckOutController::class, 'success'])
+    ->name('order.success')
+    ->middleware('auth:customer');
 
 // Route::middleware(['web', 'auth', 'verified', 'check.permission'])->prefix('admin')->name('admin.')->group(function () {
 //     /** admin routes */

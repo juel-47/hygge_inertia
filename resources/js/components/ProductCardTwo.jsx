@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { Link, usePage } from "@inertiajs/react";
 import { route } from "ziggy-js";
 import { router } from "@inertiajs/react";
+import 'react-toastify/dist/ReactToastify.css';
 // import { useCartStore } from '../stores/cartStore';
 
 
@@ -31,26 +32,12 @@ const ProductCardTwo = ({ product }) => {
                 customization_id: null,
             },
             {
-                showProgress: false, // ✅ NO progress bar
+                showProgress: false, 
                 preserveState: true,
                 preserveScroll: true,
 
                 onSuccess: () => {
                     toast.success("Product added to cart!");
-                    // setTimeout(() => {
-                    //     setMessage("");
-                    // }, 2000);
-                    // const newCartItems = props.cart_items;
-                    // const newTotal = props.total;
-
-                    // if (newCartItems) {
-                    //     const updatedState = recalculate(newCartItems);
-                    //     useCartStore.setState({
-                    //         cartItems: newCartItems,
-                    //         total: newTotal || updatedState.total,
-                    //         cartCount: updatedState.cartCount,
-                    //     });
-                    // }
                 },
                 onError: (errors) => {
                     toast.error("Failed to add to cart");

@@ -37,4 +37,9 @@ class CheckOutController extends Controller
             'customer_addresses' => $customerAddresses,
         ]);
     }
+
+    public function success()
+    {
+        return Inertia::render('OrderSuccessPage');
+    }
 }

@@ -3,6 +3,7 @@ import { router } from "@inertiajs/react";
 import { usePage } from "@inertiajs/react";
 import { useCartStore } from "../stores/cartStore";
 import { toast } from "react-toastify";
+import { route } from "ziggy-js";
 
 const CheckoutPage = () => {
   const { props } = usePage();
@@ -72,35 +73,321 @@ const CheckoutPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
 
-    if (formData.deliveryType === "pickup" && !formData.pickupLocationId) {
-      toast.error("Please select a pickup location");
-      setLoading(false);
-      return;
+  //   if (formData.deliveryType === "pickup" && !formData.pickupLocationId) {
+  //     toast.error("Please select a pickup location");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   if (!formData.termsAgreed) {
+  //     toast.error("You must agree to the terms and conditions");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   let payload = {
+  //     personal_info: {
+  //       name: `${formData.firstName} ${formData.lastName}`.trim(),
+  //       email: formData.email,
+  //       phone: formData.phone,
+  //       address: formData.address,
+  //       city: formData.city,
+  //       state: formData.state,
+  //       zip: formData.zipCode,
+  //       country: formData.country,
+  //     },
+  //     ship_to_different_address: formData.shipToDifferentAddress,
+  //     shipping_address: formData.shipToDifferentAddress ? {
+  //       name: `${formData.bill_firstName} ${formData.bill_lastName}`.trim(),
+  //       email: formData.bill_email,
+  //       phone: formData.bill_phone,
+  //       address: formData.bill_address,
+  //       city: formData.bill_city,
+  //       state: formData.bill_state,
+  //       zip: formData.bill_zipCode,
+  //       country: formData.bill_country,
+  //     } : null,
+  //     delivery_type: formData.deliveryType,
+  //     shipping_method: formData.deliveryType === "shipping" ? formData.shippingMethod : null,
+  //     pickup_location_id: formData.deliveryType === "pickup" ? formData.pickupLocationId : null,
+  //     payment_method: formData.paymentMethod,
+  //     paypal_email: formData.paymentMethod === "paypal" ? formData.paypalEmail : null,
+  //   };
+
+  //   router.post(route('checkout.store'), payload, {
+  //     onSuccess: () => {
+  //       useCartStore.getState().clearCart();
+  //       toast.success("Order placed successfully!");
+  //       router.visit(route('order.success'));
+  //     },
+  //     onError: (errors) => {
+  //       toast.error("Please fix the errors");
+  //       console.log(errors);
+  //     },
+  //     onFinish: () => setLoading(false),
+  //   });
+  // };
+
+
+
+  // Shipping cost
+//   const handleSubmit = (e) => {
+//   e.preventDefault();
+//   setLoading(true);
+
+//   if (formData.deliveryType === "pickup" && !formData.pickupLocationId) {
+//     toast.error("Please select a pickup location");
+//     setLoading(false);
+//     return;
+//   }
+
+//   if (!formData.termsAgreed) {
+//     toast.error("You must agree to the terms and conditions");
+//     setLoading(false);
+//     return;
+//   }
+
+//   // Shipping / Pickup full object
+//   // let selectedShippingMethod = null;
+//   // if (formData.deliveryType === "shipping") {
+//   //   selectedShippingMethod = checkoutData.shipping_methods.find(
+//   //     (m) => m.id.toString() === formData.shippingMethod
+//   //   );
+//   // } else if (formData.deliveryType === "pickup") {
+//   //   selectedShippingMethod = checkoutData.pickup_methods.find(
+//   //     (p) => p.id.toString() === formData.pickupLocationId
+//   //   );
+//   // }
+//   let selectedShippingMethod = null;
+// if (formData.deliveryType === "shipping") {
+//   selectedShippingMethod = shipping_methods.find(
+//     (m) => m.id.toString() === formData.shippingMethod
+//   );
+// } else if (formData.deliveryType === "pickup") {
+//   selectedShippingMethod = pickup_methods.find(
+//     (p) => p.id.toString() === formData.pickupLocationId
+//   );
+// }
+
+//   // Shipping address logic
+//   const shippingAddress = formData.shipToDifferentAddress
+//     ? {
+//         name: `${formData.bill_firstName} ${formData.bill_lastName}`.trim(),
+//         email: formData.bill_email,
+//         phone: formData.bill_phone,
+//         address: formData.bill_address,
+//         city: formData.bill_city,
+//         state: formData.bill_state,
+//         zip: formData.bill_zipCode,
+//         country: formData.bill_country,
+//       }
+//     : {
+//         name: `${formData.firstName} ${formData.lastName}`.trim(),
+//         email: formData.email,
+//         phone: formData.phone,
+//         address: formData.address,
+//         city: formData.city,
+//         state: formData.state,
+//         zip: formData.zipCode,
+//         country: formData.country,
+//       };
+
+//   const payload = {
+//     personal_info: {
+//       name: `${formData.firstName} ${formData.lastName}`.trim(),
+//       email: formData.email,
+//       phone: formData.phone,
+//       address: formData.address,
+//       city: formData.city,
+//       state: formData.state,
+//       zip: formData.zipCode,
+//       country: formData.country,
+//     },
+//     shipping_address: shippingAddress,
+//     ship_to_different_address: formData.shipToDifferentAddress,
+//     delivery_type: formData.deliveryType,
+//     shipping_method: selectedShippingMethod, // full object
+//     payment_method: formData.paymentMethod,
+//     paypal_email: formData.paymentMethod === "paypal" ? formData.paypalEmail : null,
+//   };
+
+//   router.post(route("checkout.store"), payload, {
+//     onSuccess: () => {
+//       useCartStore.getState().clearCart();
+//       toast.success("Order placed successfully!");
+//       router.visit(route("order.success"));
+//     },
+//     onError: (errors) => {
+//       toast.error("Please fix the errors");
+//       console.log(errors);
+//     },
+//     onFinish: () => setLoading(false),
+//   });
+// };
+
+// const handleSubmit = (e) => {
+//   e.preventDefault();
+//   setLoading(true);
+
+//   // Pickup validation
+//   if (formData.deliveryType === "pickup" && !formData.pickupLocationId) {
+//     toast.error("Please select a pickup location");
+//     setLoading(false);
+//     return;
+//   }
+
+//   // Terms & conditions validation
+//   if (!formData.termsAgreed) {
+//     toast.error("You must agree to the terms and conditions");
+//     setLoading(false);
+//     return;
+//   }
+
+//   // Shipping / Pickup method array
+//   let shippingMethodArray = [];
+
+//   if (formData.deliveryType === "shipping") {
+//     const selected = shipping_methods.find(
+//       (m) => m.id.toString() === formData.shippingMethod
+//     );
+//     if (selected) {
+//       shippingMethodArray.push({
+//         id: selected.id,
+//         name: selected.name,
+//         type: selected.type,
+//         cost: selected.cost,
+//       });
+//     }
+//   } else if (formData.deliveryType === "pickup") {
+//     const selected = pickup_methods.find(
+//       (p) => p.id.toString() === formData.pickupLocationId
+//     );
+//     if (selected) {
+//       shippingMethodArray.push({
+//         id: selected.id,
+//         name: selected.name,
+//         type: selected.type,
+//         cost: selected.cost,
+//       });
+//     }
+//   }
+
+//   // Shipping address logic
+//   const shippingAddress = formData.shipToDifferentAddress
+//     ? {
+//         name: `${formData.bill_firstName} ${formData.bill_lastName}`.trim(),
+//         email: formData.bill_email,
+//         phone: formData.bill_phone,
+//         address: formData.bill_address,
+//         city: formData.bill_city,
+//         state: formData.bill_state,
+//         zip: formData.bill_zipCode,
+//         country: formData.bill_country,
+//       }
+//     : {
+//         name: `${formData.firstName} ${formData.lastName}`.trim(),
+//         email: formData.email,
+//         phone: formData.phone,
+//         address: formData.address,
+//         city: formData.city,
+//         state: formData.state,
+//         zip: formData.zipCode,
+//         country: formData.country,
+//       };
+
+//   // ✅ Payload for backend
+//   const payload = {
+//     personal_info: {
+//       name: `${formData.firstName} ${formData.lastName}`.trim(),
+//       email: formData.email,
+//       phone: formData.phone,
+//       address: formData.address,
+//       city: formData.city,
+//       state: formData.state,
+//       zip: formData.zipCode,
+//       country: formData.country,
+//     },
+//     shipping_address: shippingAddress,
+//     ship_to_different_address: formData.shipToDifferentAddress,
+//     delivery_type: formData.deliveryType,
+    
+//     // এখানে পরিবর্তন করা হয়েছে → array কে JSON string করা হচ্ছে
+//     shipping_method: JSON.stringify(shippingMethodArray),
+    
+//     payment_method: formData.paymentMethod,
+//     paypal_email: formData.paymentMethod === "paypal" ? formData.paypalEmail : null,
+//     cart_items: cartItems,
+//   };
+
+//   router.post(route("checkout.store"), payload, {
+//     onSuccess: () => {
+//       useCartStore.getState().clearCart();
+//       toast.success("Order placed successfully!");
+//       router.visit(route("order.success"));
+//     },
+//     onError: (errors) => {
+//       console.log(errors);
+//       toast.error("Please fix the errors before submitting");
+//     },
+//     onFinish: () => setLoading(false),
+//   });
+// };
+
+
+const handleSubmit = (e) => {
+  e.preventDefault();
+  setLoading(true);
+
+  // Pickup validation
+  if (formData.deliveryType === "pickup" && !formData.pickupLocationId) {
+    toast.error("Please select a pickup location");
+    setLoading(false);
+    return;
+  }
+
+  // Terms & conditions validation
+  if (!formData.termsAgreed) {
+    toast.error("You must agree to the terms and conditions");
+    setLoading(false);
+    return;
+  }
+
+  // Shipping / Pickup method object
+  let shippingMethodObject = null;
+
+  if (formData.deliveryType === "shipping") {
+    const selected = shipping_methods.find(
+      (m) => m.id.toString() === formData.shippingMethod
+    );
+    if (selected) {
+      shippingMethodObject = {
+        id: selected.id,
+        name: selected.name,
+        type: selected.type,
+        cost: selected.cost,
+      };
     }
-
-    if (!formData.termsAgreed) {
-      toast.error("You must agree to the terms and conditions");
-      setLoading(false);
-      return;
+  } else if (formData.deliveryType === "pickup") {
+    const selected = pickup_methods.find(
+      (p) => p.id.toString() === formData.pickupLocationId
+    );
+    if (selected) {
+      shippingMethodObject = {
+        id: selected.id,
+        name: selected.name,
+        type: selected.type,
+        cost: selected.cost,
+      };
     }
+  }
 
-    let payload = {
-      personal_info: {
-        name: `${formData.firstName} ${formData.lastName}`.trim(),
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zip: formData.zipCode,
-        country: formData.country,
-      },
-      ship_to_different_address: formData.shipToDifferentAddress,
-      shipping_address: formData.shipToDifferentAddress ? {
+  // Shipping address logic
+  const shippingAddress = formData.shipToDifferentAddress
+    ? {
         name: `${formData.bill_firstName} ${formData.bill_lastName}`.trim(),
         email: formData.bill_email,
         phone: formData.bill_phone,
@@ -109,29 +396,56 @@ const CheckoutPage = () => {
         state: formData.bill_state,
         zip: formData.bill_zipCode,
         country: formData.bill_country,
-      } : null,
-      delivery_type: formData.deliveryType,
-      shipping_method_id: formData.deliveryType === "shipping" ? formData.shippingMethod : null,
-      pickup_location_id: formData.deliveryType === "pickup" ? formData.pickupLocationId : null,
-      payment_method: formData.paymentMethod,
-      paypal_email: formData.paymentMethod === "paypal" ? formData.paypalEmail : null,
-    };
+      }
+    : {
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip: formData.zipCode,
+        country: formData.country,
+      };
 
-    router.post(route('checkout.store'), payload, {
-      onSuccess: () => {
-        useCartStore.getState().clearCart();
-        toast.success("Order placed successfully!");
-        router.visit(route('order.success'));
-      },
-      onError: (errors) => {
-        toast.error("Please fix the errors");
-        console.log(errors);
-      },
-      onFinish: () => setLoading(false),
-    });
+  // ✅ Payload for backend
+  const payload = {
+    personal_info: {
+      name: `${formData.firstName} ${formData.lastName}`.trim(),
+      email: formData.email,
+      phone: formData.phone,
+      address: formData.address,
+      city: formData.city,
+      state: formData.state,
+      zip: formData.zipCode,
+      country: formData.country,
+    },
+    shipping_address: shippingAddress,
+    ship_to_different_address: formData.shipToDifferentAddress,
+    delivery_type: formData.deliveryType,
+    
+    // 👈 ফাইনাল সমাধান: JSON string হিসেবে পাঠানো
+    shipping_method: shippingMethodObject ? JSON.stringify(shippingMethodObject) : null,
+    
+    payment_method: formData.paymentMethod,
+    paypal_email: formData.paymentMethod === "paypal" ? formData.paypalEmail : null,
+    cart_items: cartItems,
   };
 
-  // Shipping cost
+  router.post(route("checkout.store"), payload, {
+    onSuccess: () => {
+      useCartStore.getState().clearCart();
+      toast.success("Order placed successfully!");
+      router.visit(route("order.success"));
+    },
+    onError: (errors) => {
+      console.log(errors);
+      toast.error("Please fix the errors before submitting");
+    },
+    onFinish: () => setLoading(false),
+  });
+};
+
   let shippingCost = 0;
   if (formData.deliveryType === "shipping") {
     const selected = shipping_methods?.find((m) => m.id.toString() === formData.shippingMethod);
