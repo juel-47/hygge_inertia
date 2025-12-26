@@ -246,7 +246,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         $request->session()->forget('cart');
-        return redirect()->back()->with('success', 'Logged out successfully!');
+        return redirect()->route('home')->with('success', 'Logged out successfully!');
 
         // return redirect()->route('home')->with('success', 'Logged out successfully!');
     }

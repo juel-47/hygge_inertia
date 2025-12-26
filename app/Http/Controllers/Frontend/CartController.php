@@ -570,7 +570,7 @@ class CartController extends Controller
     public function index()
     {
         $cartItems = $this->currentCart();
-
+        // dd($cartItems);
         $cartItems->each(function ($item) {
             $opt = $item->options;
 
@@ -829,6 +829,7 @@ class CartController extends Controller
     {
         $userId = auth('customer')->id();
         $sessionId = session()->getId();
+        // $sessionId =11;
 
         return Cart::with('product')
             ->where(fn($q) => $userId ? $q->where('user_id', $userId) : $q->where('session_id', $sessionId))

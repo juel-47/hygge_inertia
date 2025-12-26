@@ -582,7 +582,7 @@
 import React, { useEffect } from "react";
 import { toast } from "react-toastify";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { usePage } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 import { useCartStore } from "../stores/cartStore"; // পাথ অনুযায়ী পরিবর্তন করো
 
 const CartPage = () => {
@@ -590,10 +590,14 @@ const CartPage = () => {
   const { cartItems, total, setCart, increment, decrement, remove } = useCartStore();
 
   // পেজ লোডে প্রথমবার সার্ভার থেকে ডাটা নিয়ে স্টোরে সেট করা
-  useEffect(() => {
-    if (cart_items?.length > 0) {
-      setCart(cart_items, serverTotal);
-    }
+  // useEffect(() => {
+  //   if (cart_items?.length > 0) {
+  //     setCart(cart_items, serverTotal);
+  //   }
+  // }, [cart_items, serverTotal]);
+    useEffect(() => {
+    // server থেকে আসা cart_items যেকোনো অবস্থায় store এ set করো
+    setCart(cart_items ?? [], serverTotal ?? 0);
   }, [cart_items, serverTotal]);
 
   // স্টক চেক (যদি প্রোডাক্টের qty না থাকে তাহলে item.product.qty ব্যবহার করো)
@@ -703,9 +707,15 @@ const CartPage = () => {
                 <span>Total</span>
                 <span>{settings?.currency_icon}{total}</span>
               </div>
-              <button className="w-full mt-6 bg-green-600 text-white py-3 rounded">
+              {/* <button className="w-full mt-6 bg-green-600 text-white py-3 rounded">
                 Proceed to Checkout
-              </button>
+              </button> */}
+              <Link
+      href={route("checkout")} 
+      className="w-full mt-6 bg-green-600 text-white py-3 rounded block text-center font-bold hover:bg-green-700 transition"
+    >
+      Proceed to Checkout
+    </Link>
             </div>
           </div>
         </div>

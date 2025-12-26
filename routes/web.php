@@ -48,6 +48,7 @@ use App\Http\Controllers\Backend\TransactionController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\Frontend\AuthController;
 use App\Http\Controllers\Frontend\CartController;
+use App\Http\Controllers\Frontend\CheckOutController;
 use App\Http\Controllers\Frontend\CustomerCustomizationController;
 use App\Http\Controllers\Frontend\FrontendController;
 use App\Http\Controllers\Frontend\HomeController;
@@ -83,7 +84,7 @@ Route::middleware('guest:customer')->group(function () {
 
     Route::get('/resend-email', [AuthController::class, 'showResend'])
         ->name('customer.resendemail');
-        
+
     Route::get('/customers/verify/{id}', [AuthController::class, 'verifyEmail'])
         ->name('customers.verify');
     Route::post('/email/verification-resend', [AuthController::class, 'resendVerification'])->name('verification.resend');
@@ -95,6 +96,8 @@ Route::middleware('guest:customer')->group(function () {
 // })->name('customer.resendemail');
 
 Route::post('/customer/logout', [AuthController::class, 'logout'])->name('customer.logout')->middleware('auth:customer');
+
+Route::get('checkout', [CheckOutController::class, 'index'])->name('checkout');
 
 Route::get('/email/verify/{id}', [AuthController::class, 'verifyEmail'])
     ->name('verification.verify')
