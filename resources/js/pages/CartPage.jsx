@@ -1,6 +1,6 @@
 // pages/CartPage.jsx
 // import React, { useEffect } from "react"; 
- 
+
 // import { toast } from "react-toastify";
 // import { FaRegTrashAlt } from "react-icons/fa";
 // import { usePage } from "@inertiajs/react";
@@ -28,7 +28,7 @@
 //         handleQuantityChange(id, qty - 1);
 //     };
 
-   
+
 
 
 //     return (
@@ -138,7 +138,7 @@
 //                                                             </h3>
 //                                                             <p className="text-sm md:text-lg font-bold text-gray mt-1">
 //                                                                 {
-                                                                    
+
 //                                                                         settings
 //                                                                         ?.currency_icon
 //                                                                 }
@@ -149,7 +149,7 @@
 //                                                             <p className="text-sm font-bold text-gray mt-1">
 //                                                                 Extra Price
 //                                                                 {
-                                                                    
+
 //                                                                         settings
 //                                                                         ?.currency_icon
 //                                                                 }
@@ -200,7 +200,7 @@
 //                                                                     </button>
 //                                                                 </div> */}
 
-                                                               
+
 
 //                                                                 {/* {item.customization_id ? (
 //                                                                 <Link
@@ -232,7 +232,7 @@
 //                                                                 Customize Again
 //                                                             </Link> */}
 //                                                                 <button
-                                                                   
+
 //                                                                     className="text-red-600 hover:text-red-700 cursor-pointer"
 //                                                                 >
 //                                                                     <FaRegTrashAlt />
@@ -322,7 +322,7 @@
 //                                             }
 //                                         }}
 //                                         className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
-                                        
+
 //                                     >
 //                                         Proceed to Checkout
 //                                     </button>

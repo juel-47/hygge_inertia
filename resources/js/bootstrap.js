@@ -16,7 +16,7 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]');
 if (csrfToken) {
     axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken.getAttribute('content');
 } else {
-    console.error('CSRF token not found!');
+    // console.error('CSRF token not found!');
 }
 /**
  * Echo exposes an expressive API for subscribing to channels and listening

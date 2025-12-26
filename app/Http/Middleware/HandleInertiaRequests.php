@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\LogoSetting;
+use App\Services\CartService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Middleware;
@@ -36,11 +38,18 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $cartService = new CartService();
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => Auth::guard('customer')->user(),
             ],
+            'logos' => [
+                'logo'    => LogoSetting::value('logo'),
+                'favicon' => LogoSetting::value('favicon'),
+            ],
+            // 'cart' => $cartService->getCartSummary(),
+            'cart' => $cartService->getNavbarCartInfo(),
         ];
     }
 }

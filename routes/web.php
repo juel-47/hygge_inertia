@@ -69,8 +69,8 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 
 //auth user or customer
 Route::middleware('guest:customer')->group(function () {
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::get('/customer/register', [AuthController::class, 'showRegister'])->name('customer.register');
+    Route::post('/customer-register', [AuthController::class, 'register']);
 
     Route::get('/customer/login', [AuthController::class, 'showLogin'])->name('customer.login');
     Route::post('/customer-login', [AuthController::class, 'login'])->name('customer.login.submit');
@@ -81,14 +81,25 @@ Route::middleware('guest:customer')->group(function () {
     Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
+    Route::get('/resend-email', [AuthController::class, 'showResend'])
+        ->name('customer.resendemail');
+        
+    Route::get('/customers/verify/{id}', [AuthController::class, 'verifyEmail'])
+        ->name('customers.verify');
     Route::post('/email/verification-resend', [AuthController::class, 'resendVerification'])->name('verification.resend');
 });
+// Route::get('/resend-email/{email?}', function ($email = null) {
+//     return Inertia::render('Auth/ResendEmail', [
+//         'email' => $email ?? session('verification_email')
+//     ]);
+// })->name('customer.resendemail');
+
+Route::post('/customer/logout', [AuthController::class, 'logout'])->name('customer.logout')->middleware('auth:customer');
 
 Route::get('/email/verify/{id}', [AuthController::class, 'verifyEmail'])
     ->name('verification.verify')
     ->middleware('signed');
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth:customer');
 
 // ===== Product Detail =====
 //product details:

@@ -38,7 +38,7 @@ class CustomVerifyEmail extends Notification
     {
         // Generate signed verification URL
         $verificationUrl = URL::temporarySignedRoute(
-            'api.v1.customers.verify',  // Laravel API verification route name
+            'customers.verify',  // Laravel API verification route name
             Carbon::now()->addMinutes(5),
             ['id' => $notifiable->id]
         );

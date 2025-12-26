@@ -184,7 +184,7 @@ const Login = ({ errors: serverErrors }) => {
                     <p className="text-gray text-sm mt-6 text-center">
                         Don’t have an account?{" "}
                         <Link
-                            href={route("register")}
+                            href={route("customer.register")}
                             className="text-indigo-400 hover:underline font-medium"
                         >
                             Sign up

@@ -4,18 +4,20 @@ import React, { useState, useRef, useEffect } from "react";
 import { IoSearchSharp } from "react-icons/io5";
 import { FaChevronDown, FaBars } from "react-icons/fa6";
 import { GrBasket } from "react-icons/gr";
-import { Link, usePage } from "@inertiajs/react";
+import { Link, router, usePage } from "@inertiajs/react";
 import { route } from "ziggy-js";
 import { useCartStore } from '../../stores/cartStore';
 
 const Navbar = () => {
-     const { categories } = usePage().props;
-     const cartCount = useCartStore((s) => s.cartCount);
-     const { auth } = usePage().props;
+    const { categories, logos } = usePage().props;
+    // const cartCount = useCartStore((s) => s.cartCount);
+    const { auth } = usePage().props;
+    const cartCount = useCartStore((state) => state.cartCount);
 
+// console.log('cart', cartCount);
 
-    const customer = auth?.user; 
-    console.log('customer', customer);
+    const customer = auth?.user;
+    const logoPath = logos?.logo || logos?.favicon;
     // console.log(cartCount);
     // const dispatch = useDispatch();
     // const navigate = useNavigate();
@@ -83,9 +85,26 @@ const Navbar = () => {
         setIsProfileDropdownOpen(!isProfileDropdownOpen);
     const toggleMobileMenu = () => setShowMobileMenu(!showMobileMenu);
 
-    const handleLogout = async () => {
-
-        // navigate("/");
+    const handleLogout = async (e) => {
+        
+        e.preventDefault(); // Important: prevent any default button behavior
+        e.stopPropagation();
+    router.post(
+        route('customer.logout'), // ← Use the correct route name (usually 'logout')
+        {}, // ← Empty data object (required)
+        {
+            onSuccess: () => {
+                router.visit(route('home'));
+            },
+            onError: (errors) => {
+                console.error('Logout failed', errors);
+            },
+            onFinish: () => {
+                // Optional: close dropdown
+                setIsProfileDropdownOpen(false);
+            }
+        }
+    );
     };
     const handleSearchSubmit = (e) => {
         e.preventDefault();
@@ -113,11 +132,10 @@ const Navbar = () => {
             {/* Main Navbar  */}
 
             <div
-                className={` bg-dark2  transition-all duration-500 ${
-                    isSticky
+                className={` bg-dark2  transition-all duration-500 ${isSticky
                         ? "fixed top-0 left-0 right-0 z-50 py-4 shadow-md"
                         : "py-6 lg:py-4"
-                }`}
+                    }`}
             >
                 <div className="px-4 sm:px-6 lg:px-10 xl:px-20 max-w-[1200px] mx-auto flex justify-between items-center">
                     <div
@@ -128,18 +146,18 @@ const Navbar = () => {
                     </div>
 
                     <div className="flex items-center gap-4 sm:gap-6 lg:gap-10">
-                        {/* {logoData?.logo_fav?.logo && (
-                            <Link href="/">
+                        {/* {logos?.logo?.favicon && ( */}
+                            <Link href={route("home")}>
                                 <img
-                                    src={`/${logoData.logo_fav.logo}`}
+                                    src={`/${logoPath}`}
                                     alt="logo"
                                     className={`w-8 sm:w-10 lg:w-12 ${
                                         isSticky ? "w-8" : ""
                                     }`}
                                 />
                             </Link>
-                        )} */}
-                        <h2>logo</h2>
+                        {/* )} */}
+                        {/* <h2>logo</h2> */}
 
                         <nav className="hidden lg:flex">
                             <ul className="flex gap-6 xl:gap-8 items-center">
@@ -155,8 +173,8 @@ const Navbar = () => {
 
                                     <div className="absolute top-full left-0 bg-cream w-[250px] p-4 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                                         <ul>
-                                           
-                                           {categories.map((cat) => (
+
+                                            {categories.map((cat) => (
                                                 <li
                                                     key={cat.id}
                                                     className="relative group/sub font-mont"
@@ -181,14 +199,14 @@ const Navbar = () => {
                                                         </span>
                                                         {cat.sub_categories
                                                             ?.length > 0 && (
-                                                            <span className="text-xs">
-                                                                ›
-                                                            </span>
-                                                        )}
+                                                                <span className="text-xs">
+                                                                    ›
+                                                                </span>
+                                                            )}
                                                     </div>
 
                                                 </li>
-                                            ))} 
+                                            ))}
                                         </ul>
                                     </div>
                                 </li>
@@ -209,7 +227,7 @@ const Navbar = () => {
                         </nav>
                     </div>
 
-                    <ul className="flex items-center gap-4 sm:gap-6">
+                    {/* <ul className="flex items-center gap-4 sm:gap-6">
                         <li
                             className="text-cream cursor-pointer"
                             onClick={toggleSearch}
@@ -217,71 +235,137 @@ const Navbar = () => {
                             <IoSearchSharp className="text-xl" />
                         </li>
 
-                            <li className="relative">
-                                <div
-                                    className="flex items-center gap-2 cursor-pointer"
-                                    onClick={toggleProfileDropdown}
-                                >
-                                     <img
-                                        src={`${customer.image}`}
-                                        alt="Profile"
-                                        className="w-8 h-8 rounded-full object-cover border border-cream"
-                                    />  
-                                     <span className="text-cream text-md hidden sm:block font-mont">
-                                        {customer.name}
-                                    </span>
-                                </div>
+                        <li className="relative">
+                            <div
+                                className="flex items-center gap-2 cursor-pointer"
+                                onClick={toggleProfileDropdown}
+                            >
+                                <img
+                                    src={`${customer?.image ?? ''}`}
+                                    alt="Profile"
+                                    className="w-8 h-8 rounded-full object-cover border border-cream"
+                                />
+                                <span className="text-cream text-md hidden sm:block font-mont">
+                                    {customer?.name ?? ''}
+                                </span>
+                            </div>
 
-                                      <ul className="absolute top-[120%] right-0 bg-cream w-[150px] p-4 rounded-lg shadow-lg z-30">
-                                        <li>
-                                            <Link
-                                                href="/profile"
-                                                className="block px-2 py-2 text-dark2 text-sm hover:bg-linear-to-r from-dark1 to-dark2 font-mont hover:text-cream rounded"
-                                                onClick={() =>
-                                                    setIsProfileDropdownOpen(
-                                                        false
-                                                    )
-                                                }
-                                            >
-                                                Profile
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <button
-                                                onClick={handleLogout}
-                                                className="block w-full text-left px-2 py-2 text-dark2 font-mont text-sm hover:bg-linear-to-r from-dark1 to-dark2 hover:text-cream rounded"
-                                            >
-                                                Logout
-                                            </button>
-                                        </li>
-                                    </ul> 
+                            <ul className="absolute top-[120%] right-0 bg-cream w-[150px] p-4 rounded-lg shadow-lg z-30">
+                                <li>
+                                    <Link
+                                        href="/profile"
+                                        className="block px-2 py-2 text-dark2 text-sm hover:bg-linear-to-r from-dark1 to-dark2 font-mont hover:text-cream rounded"
+                                        onClick={() =>
+                                            setIsProfileDropdownOpen(
+                                                false
+                                            )
+                                        }
+                                    >
+                                        Profile
+                                    </Link>
+                                </li>
+                                <li>
+                                    <button
+                                        onClick={handleLogout}
+                                        type="button"
+                                        className="block w-full text-left px-2 py-2 text-dark2 font-mont text-sm hover:bg-linear-to-r from-dark1 to-dark2 hover:text-cream rounded"
+                                    >
+                                        Logout
+                                    </button>
+                                </li>
+                            </ul>
 
-                            </li>
+                        </li>
 
-                            <li className="text-cream text-md hidden lg:block font-mont">
-                                <Link href={route('customer.login')}>SIGN IN</Link>
-                            </li>
+                        <li className="text-cream text-md hidden lg:block font-mont">
+                            <Link href={route('customer.login')}>SIGN IN</Link>
+                        </li>
 
                         <li className="text-cream relative">
                             <Link href="/cart">
                                 <GrBasket size={35} />
                                 {cartCount > 0 && (
                                     <div className="absolute -top-2 font-mont -right-2 w-5 h-5 rounded-full bg-red text-cream flex justify-center items-center text-xs">
-                                       {cartCount}
+                                        {cartCount}
                                     </div>
-                                    )}
+                                )}
                             </Link>
                         </li>
-                    </ul>
+                    </ul> */}
+                    <ul className="flex items-center gap-4 sm:gap-6">
+    <li
+        className="text-cream cursor-pointer"
+        onClick={toggleSearch}
+    >
+        <IoSearchSharp className="text-xl" />
+    </li>
+
+    {/* Conditional: Logged in user → Profile Dropdown | Guest → SIGN IN */}
+    {customer ? (
+        <li className="relative">
+            <div
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={toggleProfileDropdown}
+            >
+                <img
+                    src={customer?.image || '/default-avatar.png'} // fallback image if no image
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full object-cover border border-cream"
+                />
+                <span className="text-cream text-md hidden sm:block font-mont">
+                    {customer?.name || 'User'}
+                </span>
+            </div>
+
+            {/* Dropdown - only show when open */}
+            {isProfileDropdownOpen && (
+                <ul className="absolute top-[120%] right-0 bg-cream w-[150px] p-4 rounded-lg shadow-lg z-30 transition-all duration-200">
+                    <li>
+                        <Link
+                            href="/profile"
+                            className="block px-2 py-2 text-dark2 text-sm hover:bg-linear-to-r from-dark1 to-dark2 font-mont hover:text-cream rounded"
+                            onClick={() => setIsProfileDropdownOpen(false)}
+                        >
+                            Profile
+                        </Link>
+                    </li>
+                    <li>
+                        <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="block w-full text-left px-2 py-2 text-dark2 font-mont text-sm hover:bg-linear-to-r from-dark1 to-dark2 hover:text-cream rounded"
+                        >
+                            Logout
+                        </button>
+                    </li>
+                </ul>
+            )}
+        </li>
+    ) : (
+        <li className="text-cream text-md hidden lg:block font-mont">
+            <Link href={route('customer.login')}>SIGN IN</Link>
+        </li>
+    )}
+
+    <li className="text-cream relative">
+        <Link href="/cart">
+            <GrBasket size={35} />
+            {/* {cartCount > 0 && ( */}
+                <div className="absolute -top-2 font-mont -right-2 w-5 h-5 rounded-full bg-red text-cream flex justify-center items-center text-xs">
+                    {cartCount}
+                </div>
+            {/* )} */}
+        </Link>
+    </li>
+</ul>
                 </div>
 
                 {/* Mobile Menu */}
                 {showMobileMenu && (
                     <div
                         ref={mobileMenuRef}
-                        className={`lg:hidden fixed ${
-                            isSticky ? "top-14" : "top-[72px]"
-                        } left-0 right-0 bg-dark2 shadow-lg z-40 max-h-[80vh] overflow-y-auto`}
+                        className={`lg:hidden fixed ${isSticky ? "top-14" : "top-[72px]"
+                            } left-0 right-0 bg-dark2 shadow-lg z-40 max-h-[80vh] overflow-y-auto`}
                     >
                         {/* <ul className="px-4 py-4 space-y-2">
                             <li>
@@ -374,11 +458,10 @@ const Navbar = () => {
                 {/* Search Overlay */}
                 <div
                     ref={searchBarRef}
-                    className={`fixed inset-x-0 px-4 sm:px-6 lg:px-20 py-6 bg-dark2 transition-all duration-500 z-50 ${
-                        showSearchbar
+                    className={`fixed inset-x-0 px-4 sm:px-6 lg:px-20 py-6 bg-dark2 transition-all duration-500 z-50 ${showSearchbar
                             ? "top-0 opacity-100"
                             : "-top-full opacity-0"
-                    }`}
+                        }`}
                 >
                     {/* <div className="flex justify-between items-center mb-4">
                         <h4 className="text-cream text-lg font-mont">
@@ -411,5 +494,5 @@ const Navbar = () => {
     );
 };
 
- 
+
 export default Navbar

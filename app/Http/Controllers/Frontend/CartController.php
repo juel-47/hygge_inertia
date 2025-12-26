@@ -454,6 +454,7 @@ class CartController extends Controller
     ========================= */
     public function addToCart(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'product_id' => 'required|integer|exists:products,id',
             'qty' => 'required|integer|min:1',
@@ -699,6 +700,44 @@ class CartController extends Controller
 
     //     return back();
     // }
+    // public function removeCart($id)
+    // {
+    //     $userId = auth('customer')->id();
+    //     $sessionId = session()->getId();
+
+    //     $cart = Cart::where('id', $id)
+    //         ->where(function ($q) use ($userId, $sessionId) {
+    //             $q->when($userId, fn($qq) => $qq->where('user_id', $userId))
+    //                 ->when(!$userId, fn($qq) => $qq->where('session_id', $sessionId));
+    //         })
+    //         ->firstOrFail();
+
+    //     /* ============================
+    //        FIND CUSTOMIZATION
+    //     ============================ */
+    //     $customization = customerCustomization::where('product_id', $cart->product_id)
+    //         ->when($userId, fn($q) => $q->where('user_id', $userId))
+    //         ->when(!$userId, fn($q) => $q->where('session_id', $sessionId))
+    //         ->first();
+
+    //     if ($customization) {
+
+    //         if ($customization->front_image) {
+    //             $this->delete_image($customization->front_image);
+    //         }
+
+    //         if ($customization->back_image) {
+    //             $this->delete_image($customization->back_image);
+    //         }
+
+    //         $customization->delete();
+    //     }
+
+    //     $cart->delete();
+
+    //     return back();
+    // }
+
     public function removeCart($id)
     {
         $userId = auth('customer')->id();
@@ -712,15 +751,14 @@ class CartController extends Controller
             ->firstOrFail();
 
         /* ============================
-           FIND CUSTOMIZATION
-        ============================ */
+       FIND CUSTOMIZATION
+    ============================ */
         $customization = customerCustomization::where('product_id', $cart->product_id)
             ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->when(!$userId, fn($q) => $q->where('session_id', $sessionId))
             ->first();
 
         if ($customization) {
-
             if ($customization->front_image) {
                 $this->delete_image($customization->front_image);
             }
@@ -734,7 +772,14 @@ class CartController extends Controller
 
         $cart->delete();
 
-        return back();
+        // AJAX বা Inertia request 
+        if (request()->wantsJson() || request()->ajax() || request()->header('X-Requested-With') || request()->header('X-Inertia')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cart item removed'
+            ]);
+        }
+        return back()->with('success', 'Cart item removed!');
     }
 
 

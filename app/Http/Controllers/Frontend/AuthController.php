@@ -19,7 +19,7 @@ use Inertia\Inertia;
 
 // class AuthController extends Controller
 // {
-    
+
 // }
 
 class AuthController extends Controller
@@ -27,11 +27,12 @@ class AuthController extends Controller
     // Register Page
     public function showRegister()
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Register');
     }
 
     public function register(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:customers,email',
@@ -48,9 +49,10 @@ class AuthController extends Controller
         $customer->notify(new CustomVerifyEmail());
 
         // Auto login after register (optional, but common)
-        Auth::guard('customer')->login($customer);
+        // Auth::guard('customer')->login($customer);
 
-        return redirect()->route('home')->with('success', 'Registration successful! Please check your email to verify your account.');
+        return Inertia::location(route('customer.resendemail', ['email' => $request->email]));
+        // return redirect()->route('home')->with('success', 'Registration successful! Please check your email to verify your account.');
     }
 
     // Login Page
@@ -59,9 +61,45 @@ class AuthController extends Controller
         return Inertia::render('Login');
     }
 
+    // public function login(Request $request)
+    // {
+    //     // dd($request->all());
+    //     $request->validate([
+    //         'email' => 'required|email',
+    //         'password' => 'required|string',
+    //     ]);
+
+    //     $customer = Customer::where('email', $request->email)->first();
+
+    //     if (!$customer || !Hash::check($request->password, $customer->password)) {
+    //         return back()->withErrors(['email' => 'Invalid credentials']);
+    //     }
+
+    //     if (!$customer->hasVerifiedEmail()) {
+    //         return back()->withErrors(['email' => 'Please verify your email first.'])->with('resend_email', $customer->email);
+    //     }
+
+    //     if ($customer->status !== 'active') {
+    //         return back()->withErrors(['email' => 'Your account is inactive. Contact support.']);
+    //     }
+
+    //     // Login the customer
+    //     Auth::guard('customer')->login($customer);
+
+    //     // Merge guest cart & customization
+    //     $sessionId = $request->cookie('cart_session');
+    //     if ($sessionId) {
+    //         $this->mergeGuestCartToUser($customer->id, $sessionId);
+    //         $this->mergeGuestCustomizationToUser($customer->id, $sessionId);
+
+    //         // Clear the guest session cookie
+    //         cookie()->queue(cookie()->forget('cart_session'));
+    //     }
+
+    //     return redirect()->intended(route('home'))->with('success', 'Welcome back, ' . $customer->name . '!');
+    // }
     public function login(Request $request)
     {
-        // dd($request->all());
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
@@ -74,28 +112,28 @@ class AuthController extends Controller
         }
 
         if (!$customer->hasVerifiedEmail()) {
-            return back()->withErrors(['email' => 'Please verify your email first.'])->with('resend_email', $customer->email);
+            return back()->withErrors(['email' => 'Please verify your email first.'])
+                ->with('resend_email', $customer->email);
         }
 
         if ($customer->status !== 'active') {
             return back()->withErrors(['email' => 'Your account is inactive. Contact support.']);
         }
 
-        // Login the customer
+        // ✅ IMPORTANT: login এর আগের session ধরে রাখো
+        $oldSessionId = session()->getId();
+
+        // LOGIN
         Auth::guard('customer')->login($customer);
 
-        // Merge guest cart & customization
-        $sessionId = $request->cookie('cart_session');
-        if ($sessionId) {
-            $this->mergeGuestCartToUser($customer->id, $sessionId);
-            $this->mergeGuestCustomizationToUser($customer->id, $sessionId);
+        // ✅ MERGE using OLD session id
+        $this->mergeGuestCartToUser($customer->id, $oldSessionId);
+        $this->mergeGuestCustomizationToUser($customer->id, $oldSessionId);
 
-            // Clear the guest session cookie
-            cookie()->queue(cookie()->forget('cart_session'));
-        }
-
-        return redirect()->intended(route('home'))->with('success', 'Welcome back, ' . $customer->name . '!');
+        return redirect()->intended(route('home'))
+            ->with('success', 'Welcome back, ' . $customer->name . '!');
     }
+
 
     // Resend Verification Email
     public function resendVerification(Request $request)
@@ -119,7 +157,7 @@ class AuthController extends Controller
         $customer = Customer::findOrFail($id);
 
         if (! $request->hasValidSignature()) {
-            return redirect()->route('login')->with('error', 'Invalid or expired verification link.');
+            return redirect()->route('customer.login')->with('error', 'Invalid or expired verification link.');
         }
 
         if ($customer->hasVerifiedEmail()) {
@@ -197,7 +235,7 @@ class AuthController extends Controller
         // Delete used reset token
         DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
-        return redirect()->route('login')->with('success', 'Password reset successful! Please login.');
+        return redirect()->route('customer.login')->with('success', 'Password reset successful! Please login.');
     }
 
     // Logout
@@ -207,8 +245,10 @@ class AuthController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        $request->session()->forget('cart');
+        return redirect()->back()->with('success', 'Logged out successfully!');
 
-        return redirect()->route('login')->with('success', 'Logged out successfully!');
+        // return redirect()->route('home')->with('success', 'Logged out successfully!');
     }
 
     // Private helpers (same as before)
@@ -234,30 +274,30 @@ class AuthController extends Controller
     //     }
     // }
     private function mergeGuestCartToUser($userId, $sessionId)
-{
-    $guestCart = Cart::where('session_id', $sessionId)->get();
+    {
+        $guestCart = Cart::where('session_id', $sessionId)->get();
 
-    foreach ($guestCart as $item) {
-        
-        $existing = Cart::where('user_id', $userId)
-            ->where('product_id', $item->product_id)
-            ->where('options->size_id', $item->options['size_id'] ?? null)
-            ->where('options->color_id', $item->options['color_id'] ?? null)
-            ->where('options->customization_id', $item->options['customization_id'] ?? null)
-            ->first();
+        foreach ($guestCart as $item) {
 
-        if ($existing) {
-           
-            $existing->increment('quantity', $item->quantity);
-            $item->delete();
-        } else {
-            $item->update([
-                'user_id' => $userId,
-                'session_id' => null,
-            ]);
+            $existing = Cart::where('user_id', $userId)
+                ->where('product_id', $item->product_id)
+                ->where('options->size_id', $item->options['size_id'] ?? null)
+                ->where('options->color_id', $item->options['color_id'] ?? null)
+                ->where('options->customization_id', $item->options['customization_id'] ?? null)
+                ->first();
+
+            if ($existing) {
+
+                $existing->increment('quantity', $item->quantity);
+                $item->delete();
+            } else {
+                $item->update([
+                    'user_id' => $userId,
+                    'session_id' => null,
+                ]);
+            }
         }
     }
-}
 
     private function mergeGuestCustomizationToUser($userId, $sessionId)
     {
@@ -302,5 +342,13 @@ class AuthController extends Controller
                 ]);
             }
         }
+    }
+    public function showResend(Request $request)
+    {
+        // dd($request->all());
+        $email = $request->query('email'); 
+        return Inertia::render('ResendEamil', [
+            'email' => $email
+        ]);
     }
 }
