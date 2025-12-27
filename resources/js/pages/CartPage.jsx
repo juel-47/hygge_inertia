@@ -615,9 +615,9 @@ const CartPage = () => {
   };
 
   const handleRemove = (id) => {
-    if (!confirm("Remove this item?")) return;
+    // if (!confirm("Remove this item?")) return;
     remove(id);
-    toast.success("Item removed");
+    toast.success("Product removed from cart");
   };
 
   return (
