@@ -215,7 +215,9 @@ const Navbar = () => {
                                     (title) => (
                                         <li key={title}>
                                             <Link
-                                                href={`/${title.toLowerCase()}`}
+                                            
+                                                // href={`/${title.toLowerCase()}`}
+                                                href={route(`${title.toLowerCase()}`)} 
                                                 className="px-4 py-2 text-cream hover:bg-nav-gradient font-mont rounded-[10px] text-md hover:text-red"
                                             >
                                                 {title}
@@ -308,7 +310,7 @@ const Navbar = () => {
                 onClick={toggleProfileDropdown}
             >
                 <img
-                    src={customer?.image || '/default-avatar.png'} // fallback image if no image
+                    src={customer?.image || '../../../../uploads/default.jpg'} // fallback image if no image
                     alt="Profile"
                     className="w-8 h-8 rounded-full object-cover border border-cream"
                 />
@@ -322,7 +324,7 @@ const Navbar = () => {
                 <ul className="absolute top-[120%] right-0 bg-cream w-[150px] p-4 rounded-lg shadow-lg z-30 transition-all duration-200">
                     <li>
                         <Link
-                            href="/profile"
+                            href={route('user.profile')}
                             className="block px-2 py-2 text-dark2 text-sm hover:bg-linear-to-r from-dark1 to-dark2 font-mont hover:text-cream rounded"
                             onClick={() => setIsProfileDropdownOpen(false)}
                         >

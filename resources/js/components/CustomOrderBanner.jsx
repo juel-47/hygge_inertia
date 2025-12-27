@@ -1,6 +1,7 @@
 import React from "react";
 import { GoArrowRight } from "react-icons/go";
 import { Link } from "@inertiajs/react";
+import { route } from "ziggy-js";
 
 const CustomOrderBanner = () => {
     return (
@@ -19,7 +20,7 @@ const CustomOrderBanner = () => {
                     </div>
                     <div className="flex justify-center lg:justify-start">
                         <Link
-                            to="/shop"
+                            href={route('all.products')}
                             className="inline-flex justify-center font-mont items-center gap-10 text-[12px] 2xl:text-[16px] 3xl:text-[18px] py-4 px-4 lg:p-5 3xl:p-[30px] bg-red border-0!  rounded-[10px] text-cream"
                         >
                             CUSTOMIZE FOR YOURSELF
