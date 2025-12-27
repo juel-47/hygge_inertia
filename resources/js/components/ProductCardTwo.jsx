@@ -11,6 +11,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const ProductCardTwo = ({ product }) => {
     const { props } = usePage();
+    const { settings } = usePage().props;
+    const currencyIcon=settings?.currency_icon
     // const { setCart, recalculate } = useCartStore();
     const [quantity, setQuantity] = useState(1);
     const [isHovered, setIsHovered] = useState(false);
@@ -168,6 +170,7 @@ const ProductCardTwo = ({ product }) => {
                 <div className="">
                     <p className="text-[12px] xl:text-[17px] text-cream font-mont">
                         {/* {currency?.settings?.currency_icon} */}
+                        {currencyIcon}
                         {product?.offer_price
                             ? product?.offer_price
                             : product?.price}
@@ -175,6 +178,7 @@ const ProductCardTwo = ({ product }) => {
                     {product?.offer_price && (
                         <p className="text-red line-through decoration-cream text-[12px] xl:text-[14px] font-mont font-medium">
                             {/* {currency?.settings?.currency_icon} */}
+                            {currencyIcon}
                             {product?.price}
                         </p>
                     )}

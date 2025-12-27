@@ -9,7 +9,8 @@ import { route } from "ziggy-js";
 import { useCartStore } from '../../stores/cartStore';
 
 const Navbar = () => {
-    const { categories, logos } = usePage().props;
+    const { categoriess, logos } = usePage().props;
+    // console.log(categoriess);
     // const cartCount = useCartStore((s) => s.cartCount);
     const { auth } = usePage().props;
     const cartCount = useCartStore((state) => state.cartCount);
@@ -174,7 +175,7 @@ const Navbar = () => {
                                     <div className="absolute top-full left-0 bg-cream w-[250px] p-4 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                                         <ul>
 
-                                            {categories.map((cat) => (
+                                            {categoriess.map((cat) => (
                                                 <li
                                                     key={cat.id}
                                                     className="relative group/sub font-mont"

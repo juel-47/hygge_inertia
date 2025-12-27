@@ -87,7 +87,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Inertia::share([
-            'categories' => function () {
+            'categoriess' => function () {
                 return Category::active()->get(['id', 'name', 'slug']);
             },
             'settings' => function () use ($generalSetting) {

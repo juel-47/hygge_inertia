@@ -8,6 +8,7 @@ use App\Http\Controllers\Frontend\FrontendController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\PageController;
 use App\Http\Controllers\Frontend\PaymentController;
+use App\Http\Controllers\Frontend\ReviewController;
 use App\Http\Controllers\Frontend\UserDashboardController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Gate;
@@ -52,7 +53,7 @@ Route::middleware(['auth:customer', 'verified'])->group(function () {
     // Route::apiResource('customer-billing-address', CustomerAddressController::class)->only('index', 'store', 'update', 'destroy');
 
     // ===== Review routes ==== 
-    // Route::post('review', [ReviewController::class, 'create'])->name('review.create');
+    Route::post('review', [ReviewController::class, 'create'])->name('review.create');
 });
 // Route::get('/resend-email/{email?}', function ($email = null) {
 //     return Inertia::render('Auth/ResendEmail', [
