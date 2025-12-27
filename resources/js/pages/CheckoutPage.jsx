@@ -40,6 +40,7 @@ const CheckoutPage = () => {
     bill_country: "",
   });
 
+  // console.log(formData)
   const [loading, setLoading] = useState(false);
 
   // Default shipping method
@@ -425,7 +426,9 @@ const handleSubmit = (e) => {
     delivery_type: formData.deliveryType,
     
     // 👈 ফাইনাল সমাধান: JSON string হিসেবে পাঠানো
-    shipping_method: shippingMethodObject ? JSON.stringify(shippingMethodObject) : null,
+    shipping_method: shippingMethodObject ,
+
+    // ? JSON.stringify(shippingMethodObject) : null
     
     payment_method: formData.paymentMethod,
     paypal_email: formData.paymentMethod === "paypal" ? formData.paypalEmail : null,
